@@ -1,16 +1,17 @@
 {
   "name": "instex",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "description": "A lightweight macOS application for editing and previewing LaTeX equations in real-time.",
   "main": "dist/main/main.js",
   "homepage": "https://github.com/panyw5/instex#readme",
   "scripts": {
     "dev": "concurrently \"npm run dev:renderer\" \"npm run dev:main\"",
     "dev:renderer": "vite",
-    "dev:main": "tsc -p tsconfig.main.json && electron dist/main/main.js",
-    "build": "npm run build:renderer && npm run build:main",
+    "dev:main": "npm run build:preload && tsc -p tsconfig.main.json && electron dist/main/main.js",
+    "build": "npm run build:renderer && npm run build:main && npm run build:preload",
     "build:renderer": "vite build",
     "build:main": "tsc -p tsconfig.main.json",
+    "build:preload": "tsc -p tsconfig.preload.json",
     "build:all": "npm run build && electron-builder",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -22,26 +23,26 @@
     "clean": "rimraf dist build"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "monaco-editor": "^0.45.0",
-    "katex": "^0.16.9",
-    "mathjs": "^12.2.1",
     "electron-store": "^8.1.0",
-    "lodash.debounce": "^4.0.8"
+    "katex": "^0.16.9",
+    "lodash.debounce": "^4.0.8",
+    "mathjs": "^12.2.1",
+    "monaco-editor": "^0.45.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.18",
     "@types/katex": "^0.16.7",
     "@types/lodash.debounce": "^4.0.9",
     "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "@vitejs/plugin-react": "^4.2.1",
     "concurrently": "^8.2.2",
     "electron": "^28.1.0",
-    "electron-builder": "^24.9.1",
+    "electron-builder": "^24.13.3",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.33.2",
@@ -78,8 +79,7 @@
       ]
     },
     "dmg": {
-      "title": "InsTex",
-      "icon": "assets/icon.icns"
+      "title": "InsTex"
     }
   },
   "repository": {

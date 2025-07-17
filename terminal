@@ -1,0 +1,3 @@
+# 检查实际的文件结构
+find dist -name "*.js" -type f
+ls -la dist/main/main/

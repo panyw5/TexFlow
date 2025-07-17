@@ -105,7 +105,9 @@ export class LaTeXLanguageService {
         { token: 'delimiter.parenthesis', foreground: '#87ceeb' },
         { token: 'text', foreground: '#d4d4d4' },
       ],
-      colors: {},
+      colors: {
+        'editor.background': '#27262F',
+      },
     });
 
     monaco.editor.defineTheme('latex-light', {
@@ -211,9 +213,14 @@ class LaTeXCompletionProvider implements monaco.languages.CompletionItemProvider
     });
 
     // Generate suggestions from LATEX_COMMANDS using the same simple format
+    // Remove duplicates by command name
+    const uniqueSuggestions = suggestions.filter((cmd, index, arr) =>
+      arr.findIndex(c => c.command === cmd.command) === index
+    );
+
     const filteredSuggestions = word === '' ?
-      suggestions.slice(0, 15) : // Show top 15 when no input
-      suggestions.filter(cmd => cmd.command.toLowerCase().startsWith(word.toLowerCase())).slice(0, 15);
+      uniqueSuggestions.slice(0, 15) : // Show top 15 when no input
+      uniqueSuggestions.filter(cmd => cmd.command.toLowerCase().startsWith(word.toLowerCase())).slice(0, 15);
 
     const completionItems = filteredSuggestions.map(cmd => {
       // Use the insertText if available (for snippets like environments), otherwise just the command

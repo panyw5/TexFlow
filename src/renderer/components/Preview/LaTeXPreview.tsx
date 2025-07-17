@@ -87,14 +87,23 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
   // Process LaTeX environments
   const processEnvironments = (content: string): string => {
     try {
+      // Replace numbered environments with unnumbered versions to avoid equation numbers
+      let processedContent = content
+        .replace(/\\begin{align}/g, '\\begin{align*}')
+        .replace(/\\end{align}/g, '\\end{align*}')
+        .replace(/\\begin{equation}/g, '\\begin{equation*}')
+        .replace(/\\end{equation}/g, '\\end{equation*}')
+        .replace(/\\begin{gather}/g, '\\begin{gather*}')
+        .replace(/\\end{gather}/g, '\\end{gather*}');
+
       // Try to render the entire content as display math
-      const html = katex.renderToString(content, {
+      const html = katex.renderToString(processedContent, {
         displayMode: true,
         throwOnError: false,
         strict: false,
         trust: true,
       });
-      return `<div style="margin: 1rem 0; text-align: center;">${html}</div>`;
+      return `<div style="margin: 1rem 0; text-align: center; width: 100%;">${html}</div>`;
     } catch (error) {
       console.error('Environment rendering error:', error);
       return `<div style="color: #f87171; padding: 0.5rem; background: #fef2f2; border-radius: 0.25rem;">
@@ -111,33 +120,53 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
       // Clean the content
       let cleanContent = content.trim();
 
-      // If it's just plain math without delimiters, wrap it in math delimiters
-      if (!cleanContent.includes('$') && !cleanContent.includes('\\begin{')) {
-        cleanContent = `$${cleanContent}$`;
-      }
-
-      // Process inline math ($...$)
-      if (cleanContent.includes('$')) {
-        return processInlineAndDisplayMath(cleanContent);
-      }
-
-      // If content looks like math (contains backslashes), try to render as display math
-      if (cleanContent.includes('\\')) {
+      // If it's just plain math without delimiters, render as display math
+      if (!cleanContent.includes('$') && !cleanContent.includes('\\begin{') && cleanContent.includes('\\')) {
         const html = katex.renderToString(cleanContent, {
           displayMode: true,
           throwOnError: false,
           strict: false,
           trust: true,
         });
-        console.log('Rendered HTML:', html);
-        return `<div style="margin: 1rem 0; text-align: center;">${html}</div>`;
-      } else {
-        // Plain text
-        return `<div style="padding: 1rem; font-family: monospace; background: #f3f4f6; border-radius: 0.25rem;">${cleanContent}</div>`;
+        console.log('Rendered HTML (direct LaTeX):', html);
+        return `<div style="margin: 1rem 0; text-align: center; width: 100%;">${html}</div>`;
+      }
+
+      // Check if content looks like math (contains ^, _, {, }, or common math patterns, or is just letters/numbers)
+      const mathPatterns = /[\^_{}]|\\[a-zA-Z]+|[a-zA-Z]\s*[\^_]|^[a-zA-Z0-9\s+\-*/=()]+$/;
+      if (mathPatterns.test(cleanContent) && !cleanContent.includes('$')) {
+        // Treat as math expression and render in display mode
+        const html = katex.renderToString(cleanContent, {
+          displayMode: true,
+          throwOnError: false,
+          strict: false,
+          trust: true,
+        });
+        console.log('Rendered HTML (detected math):', html);
+        return `<div style="margin: 1rem 0; text-align: center; width: 100%; color: white;">${html}</div>`;
+      }
+
+      // Process inline and display math ($...$, $$...$$)
+      if (cleanContent.includes('$')) {
+        return processInlineAndDisplayMath(cleanContent);
+      }
+
+      // For any remaining content, try to render as math first
+      try {
+        const html = katex.renderToString(cleanContent, {
+          displayMode: true,
+          throwOnError: true,
+          strict: false,
+          trust: true,
+        });
+        return `<div style="margin: 1rem 0; text-align: center; width: 100%; color: white;">${html}</div>`;
+      } catch {
+        // If KaTeX fails, show as styled text with dark theme
+        return `<div style="padding: 1rem; font-family: monospace; background: #2b2b2b; border-radius: 0.25rem; color: white; text-align: center;">${cleanContent}</div>`;
       }
     } catch (error) {
       console.error('Math rendering error:', error);
-      return `<div style="color: #f87171; padding: 0.5rem; background: #fef2f2; border-radius: 0.25rem;">
+      return `<div style="color: #f87171; padding: 0.5rem; background: #2b2b2b; border-radius: 0.25rem;">
         <strong>Error rendering math:</strong> ${error instanceof Error ? error.message : 'Unknown error'}<br/>
         <strong>Input:</strong> ${content}
       </div>`;
@@ -158,7 +187,7 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
             strict: false,
             trust: true,
           });
-          return `<div style="margin: 1rem 0; text-align: center;">${html}</div>`;
+          return `<div style="margin: 1rem 0; text-align: center; width: 100%;">${html}</div>`;
         } catch (error) {
           return `<div style="color: #f87171;">Error rendering display math: ${math}</div>`;
         }
@@ -179,7 +208,7 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
         }
       });
 
-      return `<div style="padding: 1rem; line-height: 1.6;">${result}</div>`;
+      return `<div style="padding: 1rem; line-height: 1.6; text-align: center;">${result}</div>`;
     } catch (error) {
       console.error('Inline/Display math error:', error);
       return `<div style="color: #f87171;">Error processing math: ${error instanceof Error ? error.message : 'Unknown error'}</div>`;
@@ -210,7 +239,7 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff'
+      backgroundColor: '#2b2b2b'
     }}>
       {/* Error display */}
       {errors.length > 0 && (
@@ -254,7 +283,7 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
           overflow: 'auto',
           padding: '16px',
           color: theme === 'dark' ? 'white' : 'black',
-          backgroundColor: theme === 'dark' ? '#111827' : '#ffffff',
+          backgroundColor: '#2b2b2b',
           fontSize: `${fontSize}px`
         }}
         dangerouslySetInnerHTML={{ __html: renderedContent }}

@@ -280,7 +280,7 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
     <div style={{
       height: '100%',
       width: '100%',
-      backgroundColor: '#1e1e1e'
+      backgroundColor: '#27262F'
     }}>
       <div
         ref={editorRef}
@@ -288,7 +288,7 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
           height: '100%',
           width: '100%',
           position: 'relative',
-          backgroundColor: '#1e1e1e'
+          backgroundColor: '#27262F'
         }}
       />
     </div>

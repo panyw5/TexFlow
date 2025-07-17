@@ -13,6 +13,7 @@ exports.IPC_CHANNELS = {
     WINDOW_MAXIMIZE: 'window:maximize',
     WINDOW_CLOSE: 'window:close',
     WINDOW_TOGGLE_FULLSCREEN: 'window:toggle-fullscreen',
+    WINDOW_TOGGLE_PIN: 'window:toggle-pin',
     // Application operations
     APP_GET_VERSION: 'app:get-version',
     APP_QUIT: 'app:quit',

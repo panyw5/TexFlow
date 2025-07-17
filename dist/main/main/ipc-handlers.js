@@ -119,6 +119,15 @@ function setupIpcHandlers() {
         const mainWindow = main_1.application.getMainWindow();
         mainWindow?.close();
     });
+    electron_1.ipcMain.handle(ipc_channels_1.IPC_CHANNELS.WINDOW_TOGGLE_PIN, () => {
+        const mainWindow = main_1.application.getMainWindow();
+        if (mainWindow) {
+            const isAlwaysOnTop = mainWindow.isAlwaysOnTop();
+            mainWindow.setAlwaysOnTop(!isAlwaysOnTop);
+            return !isAlwaysOnTop;
+        }
+        return false;
+    });
     // Application operations
     electron_1.ipcMain.handle(ipc_channels_1.IPC_CHANNELS.APP_GET_VERSION, () => {
         return electron_1.app.getVersion();

@@ -19,7 +19,7 @@ module.exports = {
       },
       colors: {
         editor: {
-          bg: '#1e1e1e',
+          bg: '#27262F',
           text: '#d4d4d4',
           comment: '#6a9955',
           command: '#569cd6',

@@ -23,10 +23,10 @@ export const LIGHT_THEME: ThemeColors = {
 };
 
 export const DARK_THEME: ThemeColors = {
-  background: '#1e1e1e',
+  background: '#2d1b3d',
   foreground: '#ffffff',
   border: '#3c3c3c',
-  accent: '#0078d4',
+  accent: '#6b46c1',
   error: '#f14c4c',
   warning: '#ffcc02',
   success: '#89d185',

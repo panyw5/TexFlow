@@ -1,6 +1,7 @@
 // Theme management utilities
 
 export type Theme = 'light' | 'dark';
+export type SplitDirection = 'horizontal' | 'vertical';
 
 export interface ThemeColors {
   background: string;
@@ -10,6 +11,11 @@ export interface ThemeColors {
   error: string;
   warning: string;
   success: string;
+}
+
+export interface AppSettings {
+  theme: Theme;
+  splitDirection: SplitDirection;
 }
 
 export const LIGHT_THEME: ThemeColors = {
@@ -35,13 +41,20 @@ export const DARK_THEME: ThemeColors = {
 export class ThemeManager {
   private static instance: ThemeManager;
   private currentTheme: Theme = 'dark';
+  private splitDirection: SplitDirection = 'vertical'; // 默认上下布局
   private listeners: Array<(theme: Theme) => void> = [];
+  private layoutListeners: Array<(direction: SplitDirection) => void> = [];
 
   private constructor() {
-    // Load theme from localStorage if available
+    // Load settings from localStorage if available
     const savedTheme = localStorage.getItem('instex-theme') as Theme;
     if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       this.currentTheme = savedTheme;
+    }
+
+    const savedLayout = localStorage.getItem('instex-layout') as SplitDirection;
+    if (savedLayout && (savedLayout === 'horizontal' || savedLayout === 'vertical')) {
+      this.splitDirection = savedLayout;
     }
   }
 
@@ -85,5 +98,36 @@ export class ThemeManager {
 
   private notifyListeners(): void {
     this.listeners.forEach(listener => listener(this.currentTheme));
+  }
+
+  public getSplitDirection(): SplitDirection {
+    return this.splitDirection;
+  }
+
+  public setSplitDirection(direction: SplitDirection): void {
+    if (this.splitDirection !== direction) {
+      this.splitDirection = direction;
+      localStorage.setItem('instex-layout', direction);
+      this.notifyLayoutListeners();
+    }
+  }
+
+  public toggleSplitDirection(): void {
+    this.setSplitDirection(this.splitDirection === 'horizontal' ? 'vertical' : 'horizontal');
+  }
+
+  public addLayoutListener(listener: (direction: SplitDirection) => void): void {
+    this.layoutListeners.push(listener);
+  }
+
+  public removeLayoutListener(listener: (direction: SplitDirection) => void): void {
+    const index = this.layoutListeners.indexOf(listener);
+    if (index > -1) {
+      this.layoutListeners.splice(index, 1);
+    }
+  }
+
+  private notifyLayoutListeners(): void {
+    this.layoutListeners.forEach(listener => listener(this.splitDirection));
   }
 }

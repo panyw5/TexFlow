@@ -56,6 +56,11 @@ body {
   background-color: transparent !important;
 }
 
+/* Monaco Editor line numbers centering */
+.monaco-editor .margin-view-overlays .line-numbers {
+  text-align: center;
+}
+
 /* KaTeX styles */
 .katex {
   font-size: 2.2em; /* Doubled from 1.1em */
@@ -279,4 +284,17 @@ body {
 /* Ensure all KaTeX elements in preview are centered */
 div[style*="text-align: center"] .katex {
   display: inline-block !important;
+}
+
+/* Add draggable region for the top bar */
+.title-bar {
+  -webkit-app-region: drag;
+}
+
+/* Make buttons and interactive elements non-draggable */
+.title-bar button,
+.title-bar input,
+.title-bar select,
+.title-bar textarea {
+  -webkit-app-region: no-drag;
 }

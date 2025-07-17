@@ -1,0 +1,263 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  overflow: hidden;
+}
+
+body {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* Monaco Editor overrides */
+.monaco-editor {
+  font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+}
+
+.monaco-editor .margin {
+  background-color: transparent !important;
+}
+
+/* KaTeX styles */
+.katex {
+  font-size: 1.1em;
+}
+
+.katex-display {
+  margin: 1em 0;
+}
+
+/* Custom components */
+.split-pane {
+  display: flex;
+  height: 100%;
+}
+
+.split-pane-vertical {
+  flex-direction: column;
+}
+
+.split-pane-horizontal {
+  flex-direction: row;
+}
+
+.pane {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.resizer {
+  background: #3c3c3c;
+  opacity: 0.2;
+  z-index: 1;
+  box-sizing: border-box;
+  background-clip: padding-box;
+}
+
+.resizer:hover {
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.resizer.horizontal {
+  height: 11px;
+  margin: -5px 0;
+  border-top: 5px solid rgba(255, 255, 255, 0);
+  border-bottom: 5px solid rgba(255, 255, 255, 0);
+  cursor: row-resize;
+  width: 100%;
+}
+
+.resizer.vertical {
+  width: 11px;
+  margin: 0 -5px;
+  border-left: 5px solid rgba(255, 255, 255, 0);
+  border-right: 5px solid rgba(255, 255, 255, 0);
+  cursor: col-resize;
+  height: 100%;
+}
+
+/* Toolbar styles */
+.toolbar {
+  background: #2d2d2d;
+  border-bottom: 1px solid #3c3c3c;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.toolbar-button {
+  background: transparent;
+  border: 1px solid #555;
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.toolbar-button:hover {
+  background: #404040;
+  border-color: #777;
+}
+
+.toolbar-button:active {
+  background: #505050;
+}
+
+.toolbar-button.active {
+  background: #0078d4;
+  border-color: #0078d4;
+}
+
+/* Status bar styles */
+.status-bar {
+  background: #007acc;
+  color: #ffffff;
+  padding: 4px 12px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 24px;
+}
+
+/* Error display styles */
+.error-display {
+  background: #f14c4c;
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-left: 4px solid #d73a49;
+}
+
+/* Preview styles */
+.preview-container {
+  background: #ffffff;
+  color: #000000;
+  padding: 20px;
+  overflow: auto;
+  height: 100%;
+}
+
+.preview-container.dark {
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+/* Loading spinner */
+.spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* LaTeX Preview Styles */
+.empty-content {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.comment {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.text-line {
+  margin: 0.5rem 0;
+}
+
+.environment-line {
+  font-family: monospace;
+  color: #569cd6;
+}
+
+.math-display {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.math-inline {
+  display: inline;
+}
+
+.math-error {
+  background-color: #f14c4c;
+  color: white;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.error-line {
+  background-color: #f14c4c;
+  color: white;
+  padding: 4px;
+  margin: 2px 0;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+/* KaTeX styling adjustments */
+.katex {
+  font-size: 1.1em;
+}
+
+.katex-display {
+  margin: 1em 0;
+}
+
+/* Dark theme LaTeX adjustments */
+.preview-container.dark .katex {
+  color: #ffffff;
+}
+
+.preview-container.dark .katex .base {
+  color: #ffffff;
+}

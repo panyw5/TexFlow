@@ -59,6 +59,11 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
         showVariables: true,
         filterGraceful: false,
         snippetsPreventQuickSuggestions: false,
+        localityBonus: true,
+        shareSuggestSelections: false,
+        showIcons: true,
+        maxVisibleSuggestions: 12,
+        insertMode: 'replace',
       },
       acceptSuggestionOnCommitCharacter: true,
       acceptSuggestionOnEnter: 'on',
@@ -116,6 +121,29 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
     // Add command to manually trigger suggestions
     monacoRef.current.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
       monacoRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
+    });
+
+    // Add listener for content changes to debug trigger issues
+    monacoRef.current.onDidChangeModelContent((e) => {
+      const model = monacoRef.current?.getModel();
+      const position = monacoRef.current?.getPosition();
+      if (model && position) {
+        const lineContent = model.getLineContent(position.lineNumber);
+        const beforeCursor = lineContent.substring(0, position.column - 1);
+        console.log('Content changed:', {
+          beforeCursor,
+          lastChar: beforeCursor.slice(-1),
+          position: position.column
+        });
+
+        // Manually trigger suggestions when backslash is typed
+        if (beforeCursor.endsWith('\\')) {
+          console.log('Backslash detected, manually triggering suggestions');
+          setTimeout(() => {
+            monacoRef.current?.trigger('editor', 'editor.action.triggerSuggest', {});
+          }, 50);
+        }
+      }
     });
 
     // Focus the editor

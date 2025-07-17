@@ -130,9 +130,13 @@ export class LaTeXLanguageService {
       colors: {},
     });
 
-    // Register completion provider
-    monaco.languages.registerCompletionItemProvider('latex', new LaTeXCompletionProvider(), {
-      triggerCharacters: ['\\', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    // Register completion provider with trigger characters
+    monaco.languages.registerCompletionItemProvider('latex', {
+      triggerCharacters: ['\\'],
+      provideCompletionItems: (model, position, context) => {
+        const provider = new LaTeXCompletionProvider();
+        return provider.provideCompletionItems(model, position, context);
+      }
     });
 
     // Register hover provider
@@ -149,8 +153,17 @@ class LaTeXCompletionProvider implements monaco.languages.CompletionItemProvider
     context: monaco.languages.CompletionContext
   ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
 
+    console.log('=== LaTeX Completion Provider Called ===');
+
     const lineContent = model.getLineContent(position.lineNumber);
     const beforeCursor = lineContent.substring(0, position.column - 1);
+
+    console.log('Completion triggered:', {
+      beforeCursor,
+      triggerCharacter: context.triggerCharacter,
+      triggerKind: context.triggerKind,
+      position: position.column
+    });
 
     // Check if we're after a backslash
     const backslashMatch = beforeCursor.match(/\\([a-zA-Z]*)$/);
@@ -168,17 +181,20 @@ class LaTeXCompletionProvider implements monaco.languages.CompletionItemProvider
         endColumn: position.column,
       };
       console.log('Backslash completion:', { word, beforeCursor, range });
-    } else {
-      // Regular word completion
-      const wordInfo = model.getWordUntilPosition(position);
-      word = wordInfo.word;
+    } else if (beforeCursor.endsWith('\\')) {
+      // Just typed a backslash
+      word = '';
       range = {
         startLineNumber: position.lineNumber,
         endLineNumber: position.lineNumber,
-        startColumn: wordInfo.startColumn,
-        endColumn: wordInfo.endColumn,
+        startColumn: position.column - 1, // Include the \
+        endColumn: position.column,
       };
-      console.log('Regular completion:', { word, range });
+      console.log('Just typed backslash:', { word, beforeCursor, range });
+    } else {
+      // Not a LaTeX command context
+      console.log('Not a LaTeX command context, skipping');
+      return { suggestions: [] };
     }
 
     // Get context (are we in math mode?)
@@ -186,31 +202,45 @@ class LaTeXCompletionProvider implements monaco.languages.CompletionItemProvider
 
     // Filter commands based on context and input
     const suggestions = this.getFilteredSuggestions(word, mathContext);
-    console.log('Filtered suggestions:', { word, suggestionsCount: suggestions.length, firstFew: suggestions.slice(0, 3).map(s => s.command) });
+    console.log('Filtered suggestions:', {
+      word,
+      wordLength: word.length,
+      suggestionsCount: suggestions.length,
+      firstFew: suggestions.slice(0, 5).map(s => s.command),
+      mathContext: mathContext.isInMath
+    });
+
+    // Generate suggestions from LATEX_COMMANDS using the same simple format
+    const filteredSuggestions = word === '' ?
+      suggestions.slice(0, 15) : // Show top 15 when no input
+      suggestions.filter(cmd => cmd.command.toLowerCase().startsWith(word.toLowerCase())).slice(0, 15);
+
+    const completionItems = filteredSuggestions.map(cmd => {
+      // Use the insertText if available (for snippets like environments), otherwise just the command
+      let insertText = cmd.insertText || cmd.command;
+
+      // Remove leading backslash if present, Monaco will add it
+      if (insertText.startsWith('\\')) {
+        insertText = insertText.substring(1);
+      }
+
+      return {
+        label: cmd.command,
+        kind: cmd.kind,
+        insertText: insertText,
+        insertTextRules: cmd.insertText ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet : undefined,
+      };
+    });
+
+    console.log('Returning LaTeX completion items:', {
+      count: completionItems.length,
+      word: word,
+      firstFew: completionItems.slice(0, 3).map(item => ({ label: item.label, insertText: item.insertText })),
+      position: position
+    });
 
     return {
-      suggestions: suggestions.map(cmd => {
-        let insertText = cmd.insertText || cmd.command;
-
-        // Ensure insertText always starts with backslash for LaTeX commands
-        if (!insertText.startsWith('\\')) {
-          insertText = '\\' + insertText;
-        }
-
-        return {
-          label: cmd.command,
-          kind: cmd.kind,
-          documentation: {
-            value: this.formatDocumentation(cmd),
-            isTrusted: true,
-          },
-          insertText: insertText,
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          range: range,
-          detail: cmd.description,
-          sortText: this.getSortText(cmd, word),
-        };
-      }),
+      suggestions: completionItems,
     };
   }
 
@@ -273,9 +303,17 @@ class LaTeXCompletionProvider implements monaco.languages.CompletionItemProvider
   private getFilteredSuggestions(input: string, mathContext: MathContext): LaTeXCommand[] {
     const lowerInput = input.toLowerCase();
 
+    console.log('getFilteredSuggestions called:', {
+      input: lowerInput,
+      inputLength: lowerInput.length,
+      totalCommands: LATEX_COMMANDS.length,
+      mathContext: mathContext.isInMath
+    });
+
     const filtered = LATEX_COMMANDS.filter(cmd => {
       // Filter by input match - check if command starts with input
-      const matchesInput = cmd.command.toLowerCase().startsWith(lowerInput);
+      // If input is empty (just typed \), show all commands
+      const matchesInput = lowerInput === '' || cmd.command.toLowerCase().startsWith(lowerInput);
 
       if (!matchesInput) return false;
 
@@ -289,13 +327,26 @@ class LaTeXCompletionProvider implements monaco.languages.CompletionItemProvider
       }
     });
 
-    console.log('Filtering debug:', {
+    console.log('Filtering result:', {
       input: lowerInput,
-      totalCommands: LATEX_COMMANDS.length,
       filteredCount: filtered.length,
-      lambdaMatch: LATEX_COMMANDS.find(cmd => cmd.command === 'lambda'),
-      lambdaStartsWith: 'lambda'.startsWith(lowerInput)
+      firstFew: filtered.slice(0, 5).map(cmd => cmd.command),
+      lambdaFound: filtered.find(cmd => cmd.command === 'lambda')
     });
+
+    // If no input, prioritize common commands
+    if (lowerInput === '') {
+      const commonCommands = ['alpha', 'beta', 'gamma', 'lambda', 'mu', 'pi', 'sigma', 'frac', 'sqrt', 'sum', 'int', 'lim'];
+      const prioritized = filtered.sort((a, b) => {
+        const aIndex = commonCommands.indexOf(a.command);
+        const bIndex = commonCommands.indexOf(b.command);
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+        return a.command.localeCompare(b.command);
+      });
+      return prioritized.slice(0, 20);
+    }
 
     return filtered.slice(0, 20); // Limit to 20 suggestions
   }

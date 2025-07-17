@@ -94,17 +94,13 @@ const App: React.FC = () => {
       if (window.electronAPI) {
         const newPinState = await window.electronAPI.togglePin();
         setIsPinned(newPinState);
+      } else {
+        console.error('[renderer] window.electronAPI is undefined!');
+        // 移除了 alert 警告
       }
     } catch (error) {
       console.error('Failed to toggle pin:', error);
     }
-  }, []);
-
-  const toggleEditorType = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      useLatexEditor: !prev.useLatexEditor,
-    }));
   }, []);
 
   // Test version with explicit inline styles to override any CSS conflicts

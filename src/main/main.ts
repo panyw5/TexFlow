@@ -42,6 +42,12 @@ class Application {
   }
 
   private createWindow(): void {
+    const isDevEnv = isDev;
+    const preloadPath = isDevEnv
+      ? path.join(__dirname, '../preload/preload-standalone.js')
+      : path.join(__dirname, '../preload/preload-standalone.js');
+    console.log('[main] __dirname:', __dirname);
+    console.log('[main] preload path:', preloadPath);
     // Create the browser window
     this.mainWindow = new BrowserWindow({
       width: 1200,
@@ -52,7 +58,7 @@ class Application {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        preload: path.join(__dirname, '../preload/preload.js'),
+        preload: preloadPath,
       },
       show: false, // Don't show until ready
     });

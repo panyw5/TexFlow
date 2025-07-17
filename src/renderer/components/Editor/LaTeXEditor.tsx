@@ -14,7 +14,7 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
   value,
   onChange,
   theme,
-  fontSize = 14,
+  fontSize = 28, // Doubled from 14
   readOnly = false,
 }, ref) => {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -62,7 +62,6 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
         localityBonus: true,
         shareSuggestSelections: false,
         showIcons: true,
-        maxVisibleSuggestions: 12,
         insertMode: 'replace',
       },
       acceptSuggestionOnCommitCharacter: true,
@@ -72,25 +71,17 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
       parameterHints: {
         enabled: true,
       },
-      hover: {
-        enabled: true,
-      },
-      folding: true,
-      foldingStrategy: 'indentation',
-      showFoldingControls: 'mouseover',
-      bracketPairColorization: {
-        enabled: true,
-      },
-      guides: {
-        bracketPairs: true,
-        indentation: true,
-      },
-      renderWhitespace: 'selection',
+      hover: { enabled: false },
+      folding: false,
+      foldingStrategy: 'auto',
+      showFoldingControls: 'never',
+      bracketPairColorization: { enabled: false },
+      guides: { bracketPairs: false, indentation: false },
+      renderWhitespace: 'none',
       renderControlCharacters: false,
-      smoothScrolling: true,
+      smoothScrolling: false,
       cursorBlinking: 'blink',
-      cursorSmoothCaretAnimation: 'on',
-      // Remove right-side decorations and scrollbar elements
+      cursorSmoothCaretAnimation: 'off',
       overviewRulerLanes: 0,
       overviewRulerBorder: false,
       hideCursorInOverviewRuler: true,
@@ -101,6 +92,7 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
         horizontalScrollbarSize: 8,
         verticalSliderSize: 8,
         horizontalSliderSize: 8,
+        alwaysConsumeMouseWheel: false
       },
     });
 

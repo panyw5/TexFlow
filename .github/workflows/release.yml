@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build:all
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/*.dmg
+            build/latest-mac.yml
+          draft: false
+          prerelease: true
+          name: "InsTex v${{ github.ref_name }} (Beta)"
+          body: |
+            ## InsTex Beta Release
+            
+            This is a beta version of InsTex - LaTeX equation editor.
+            
+            ### Downloads
+            - **Intel Mac**: InsTex-${{ github.ref_name }}.dmg
+            - **Apple Silicon**: InsTex-${{ github.ref_name }}-arm64.dmg
+            
+            ### What's New
+            - Initial beta release
+            - Real-time LaTeX equation editing and preview
+            - Monaco editor integration
+            - KaTeX rendering support
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

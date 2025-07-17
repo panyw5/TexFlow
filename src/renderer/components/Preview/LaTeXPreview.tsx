@@ -18,7 +18,7 @@ interface RenderError {
 export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
   content,
   theme,
-  fontSize = 16,
+  fontSize = 32, // Doubled from 16
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [renderedContent, setRenderedContent] = useState<string>('');
@@ -29,7 +29,7 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
   const debouncedRender = useMemo(
     () => debounce((content: string) => {
       renderLaTeX(content);
-    }, 300),
+    }, 100),
     []
   );
 

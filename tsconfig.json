@@ -26,12 +26,12 @@
   },
   "include": [
     "src/renderer/**/*",
-    "src/shared/**/*",
-    "src/preload/**/*"
+    "src/shared/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "build"
+    "build",
+    "src/preload/**/*"
   ]
 }

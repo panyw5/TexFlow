@@ -23,8 +23,8 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\"",
     "type-check": "tsc --noEmit",
     "clean": "rimraf dist build",
-    "convert-icon": "mkdir -p img/logo.iconset && sips -z 16 16 img/logo.png --out img/logo.iconset/icon_16x16.png && sips -z 32 32 img/logo.png --out img/logo.iconset/icon_16x16@2x.png && sips -z 32 32 img/logo.png --out img/logo.iconset/icon_32x32.png && sips -z 64 64 img/logo.png --out img/logo.iconset/icon_32x32@2x.png && sips -z 128 128 img/logo.png --out img/logo.iconset/icon_128x128.png && sips -z 256 256 img/logo.png --out img/logo.iconset/icon_128x128@2x.png && sips -z 256 256 img/logo.png --out img/logo.iconset/icon_256x256.png && sips -z 512 512 img/logo.png --out img/logo.iconset/icon_256x256@2x.png && sips -z 512 512 img/logo.png --out img/logo.iconset/icon_512x512.png && sips -z 1024 1024 img/logo.png --out img/logo.iconset/icon_512x512@2x.png && iconutil -c icns img/logo.iconset && rm -rf img/logo.iconset",
-    "prebuild:all": "npm run convert-icon"
+    "convert-icon": "bash scripts/convert-icon.sh",
+    "convert-icon:win": "bash scripts/convert-icon-windows.sh"
   },
   "dependencies": {
     "electron-store": "^8.1.0",

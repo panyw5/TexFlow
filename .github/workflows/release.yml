@@ -35,13 +35,17 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           choco install imagemagick -y
-          if (Test-Path "img/logo.png") {
-            magick img/logo.png -define icon:auto-resize=256,128,64,48,32,16 img/logo.ico
-            Write-Host "Windows icon created: img/logo.ico"
-          }
+          npm run convert-icon:win
         shell: pwsh
 
-      - name: Build application
+      - name: Build application (skip prebuild on Windows)
+        if: matrix.os == 'windows-latest'
+        run: npm run build && electron-builder
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Build application (macOS)
+        if: matrix.os == 'macos-latest'
         run: npm run build:all
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

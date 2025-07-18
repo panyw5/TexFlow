@@ -7,6 +7,7 @@ const CHANNELS = {
   FILE_OPEN: 'file:open',
   FILE_SAVE: 'file:save',
   FILE_SAVE_AS: 'file:save-as',
+  FILE_SAVE_BINARY: 'file:save-binary',
   WINDOW_MINIMIZE: 'window:minimize',
   WINDOW_MAXIMIZE: 'window:maximize',
   WINDOW_CLOSE: 'window:close',
@@ -35,6 +36,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke(CHANNELS.FILE_SAVE, content, filePath),
   saveFileAs: (content: string) => 
     ipcRenderer.invoke(CHANNELS.FILE_SAVE_AS, content),
+  saveBinaryFile: (data: string, defaultName: string) => 
+    ipcRenderer.invoke(CHANNELS.FILE_SAVE_BINARY, data, defaultName),
 
   // 窗口操作
   minimizeWindow: () => ipcRenderer.invoke(CHANNELS.WINDOW_MINIMIZE),
@@ -73,6 +76,7 @@ declare global {
       openFile: () => Promise<any>;
       saveFile: (content: string, filePath?: string) => Promise<any>;
       saveFileAs: (content: string) => Promise<any>;
+      saveBinaryFile: (data: string, defaultName: string) => Promise<any>;
       minimizeWindow: () => Promise<void>;
       maximizeWindow: () => Promise<void>;
       closeWindow: () => Promise<void>;

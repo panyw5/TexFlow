@@ -5,6 +5,7 @@ export const IPC_CHANNELS = {
   FILE_OPEN: 'file:open',
   FILE_SAVE: 'file:save',
   FILE_SAVE_AS: 'file:save-as',
+  FILE_SAVE_BINARY: 'file:save-binary',
   FILE_NEW: 'file:new',
   
   // Window operations

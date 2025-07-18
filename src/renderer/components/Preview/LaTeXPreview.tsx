@@ -278,6 +278,7 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
       {/* Preview content */}
       <div
         ref={containerRef}
+        className="latex-preview-content"
         style={{
           flex: 1,
           overflow: 'auto',

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { LaTeXEditor } from './Editor/LaTeXEditor';
 import { LaTeXPreview } from './Preview/LaTeXPreview';
 import { ResizableSplitPane } from './Layout/ResizableSplitPane';
-// import { Toolbar } from './Layout/Toolbar';
-// import { StatusBar } from './Layout/StatusBar';
 import { ThemeManager } from '../utils/theme-manager';
 
 interface AppState {
@@ -125,10 +123,175 @@ const App: React.FC = () => {
     setShowOutputDropdown(prev => !prev);
   }, []);
 
-  const handleOutputFormat = useCallback((format: 'png' | 'jpg' | 'pdf' | 'svg') => {
-    console.log(`Export as ${format.toUpperCase()}`);
-    // TODO: Implement actual export functionality
-    setShowOutputDropdown(false);
+  const handleOutputFormat = useCallback(async (format: 'png' | 'jpg' | 'pdf' | 'svg') => {
+    try {
+      console.log(`Starting export as ${format}`);
+      
+      // Debug: Let's see what elements exist
+      console.log('All elements with "preview" in class:', document.querySelectorAll('[class*="preview"]'));
+      console.log('All elements with "latex" in class:', document.querySelectorAll('[class*="latex"]'));
+      console.log('All divs in document:', document.querySelectorAll('div').length);
+      
+      // Get the specific math element instead of the entire preview
+      let mathElement = document.querySelector('.katex-display .katex') || 
+                       document.querySelector('.katex');
+      
+      if (!mathElement) {
+        // Fallback to preview container if no math found
+        mathElement = document.querySelector('.latex-preview-content');
+      }
+      
+      console.log('Math element found:', mathElement);
+      
+      if (!mathElement) {
+        console.error('Math element not found');
+        alert('Math content not found. Make sure LaTeX is rendered.');
+        return;
+      }
+
+      let dataUrl: string;
+      let fileName: string;
+      let fileExtension: string;
+
+      switch (format) {
+        case 'png':
+        case 'jpg':
+          console.log('Capturing math element with html2canvas...');
+          // Dynamic import for html2canvas
+          const html2canvas = (await import('html2canvas')).default;
+          const canvas = await html2canvas(mathElement as HTMLElement, {
+            backgroundColor: format === 'png' ? null : '#ffffff', // Transparent for PNG
+            scale: 8, // Ultra-high resolution for crisp math
+            useCORS: true,
+            allowTaint: true,
+            removeContainer: true,
+            // Let html2canvas determine optimal size based on content
+            logging: false,
+            // Add minimal padding
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0,
+          });
+          console.log('Canvas created:', canvas.width, 'x', canvas.height);
+          dataUrl = canvas.toDataURL(`image/${format}`, 0.95);
+          fileExtension = format;
+          break;
+
+        case 'pdf':
+          // Dynamic import for jsPDF
+          const { jsPDF } = await import('jspdf');
+          const html2canvasPdf = (await import('html2canvas')).default;
+          const canvas2 = await html2canvasPdf(mathElement as HTMLElement, {
+            backgroundColor: '#ffffff',
+            scale: 8,
+            useCORS: true,
+            allowTaint: true,
+            removeContainer: true,
+          });
+          
+          const imgData = canvas2.toDataURL('image/png');
+          const pdf = new jsPDF();
+          const imgWidth = 210;
+          const pageHeight = 295;
+          const imgHeight = (canvas2.height * imgWidth) / canvas2.width;
+          let heightLeft = imgHeight;
+
+          let position = 0;
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+
+          while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+          }
+
+          const pdfBlob = pdf.output('blob');
+          dataUrl = URL.createObjectURL(pdfBlob);
+          fileExtension = 'pdf';
+          break;
+
+        case 'svg':
+          // Extract SVG content
+          const svgElement = mathElement.querySelector('svg');
+          if (svgElement) {
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml' });
+            dataUrl = URL.createObjectURL(svgBlob);
+          } else {
+            // Fallback: convert to SVG using canvas
+            const html2canvasSvg = (await import('html2canvas')).default;
+            const canvas3 = await html2canvasSvg(mathElement as HTMLElement, {
+              backgroundColor: null,
+              scale: 8,
+              useCORS: true,
+              allowTaint: true,
+              removeContainer: true,
+            });
+            // Note: This creates a raster SVG, not true vector
+            const imgData3 = canvas3.toDataURL('image/png');
+            const svgContent = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="${canvas3.width}" height="${canvas3.height}">
+                <image href="${imgData3}" width="${canvas3.width}" height="${canvas3.height}"/>
+              </svg>
+            `;
+            const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+            dataUrl = URL.createObjectURL(svgBlob);
+          }
+          fileExtension = 'svg';
+          break;
+
+        default:
+          return;
+      }
+
+      // Generate filename
+      fileName = `latex-export-${Date.now()}.${fileExtension}`;
+
+      // Use Electron's save dialog
+      if (window.electronAPI) {
+        console.log('Using Electron API to save file...');
+        // Convert dataUrl to buffer for Electron
+        const response = await fetch(dataUrl);
+        const buffer = await response.arrayBuffer();
+        
+        // Save file through Electron
+        const result = await window.electronAPI.saveBinaryFile(
+          Buffer.from(buffer).toString('base64'), 
+          fileName
+        );
+        console.log('Save result:', result);
+        if (result.success) {
+          console.log(`Exported as ${format.toUpperCase()}: ${result.filePath}`);
+          alert(`Successfully exported as ${format.toUpperCase()}`);
+        } else {
+          console.error('Save failed:', result.error);
+          alert(`Export failed: ${result.error}`);
+        }
+      } else {
+        console.log('Using browser download fallback...');
+        // Fallback: browser download
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        alert(`Downloaded as ${fileName}`);
+      }
+
+      // Clean up object URLs
+      if (format === 'pdf' || format === 'svg') {
+        URL.revokeObjectURL(dataUrl);
+      }
+
+    } catch (error) {
+      console.error(`Failed to export as ${format}:`, error);
+    } finally {
+      setShowOutputDropdown(false);
+    }
   }, []);
 
   // Close dropdown when clicking outside

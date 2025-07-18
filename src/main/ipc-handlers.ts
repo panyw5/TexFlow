@@ -124,6 +124,43 @@ export function setupIpcHandlers(): void {
     }
   );
 
+  ipcMain.handle(
+    IPC_CHANNELS.FILE_SAVE_BINARY,
+    async (_, data: string, defaultName: string): Promise<FileSaveResult> => {
+      try {
+        const mainWindow = application.getMainWindow();
+        if (!mainWindow) {
+          return { success: false, error: 'No main window available' };
+        }
+
+        const result = await dialog.showSaveDialog(mainWindow, {
+          defaultPath: defaultName,
+          filters: [
+            { name: 'All Files', extensions: ['*'] },
+          ],
+        });
+
+        if (result.canceled || !result.filePath) {
+          return { success: false, error: 'Save canceled' };
+        }
+
+        // Convert base64 to buffer and save
+        const buffer = Buffer.from(data, 'base64');
+        await fs.writeFile(result.filePath, buffer);
+
+        return {
+          success: true,
+          filePath: result.filePath,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
+    }
+  );
+
   // Window operations
   ipcMain.handle(IPC_CHANNELS.WINDOW_MINIMIZE, () => {
     const mainWindow = application.getMainWindow();

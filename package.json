@@ -1,6 +1,6 @@
 {
   "name": "texflow",
-  "version": "0.6.0",
+  "version": "0.7.1",
   "description": "A lightweight macOS application for editing and previewing LaTeX equations in real-time.",
   "main": "dist/main/main.js",
   "homepage": "https://github.com/panyw5/texflow#readme",
@@ -13,6 +13,8 @@
     "build:main": "tsc -p tsconfig.main.json",
     "build:preload": "tsc -p tsconfig.preload.json",
     "build:all": "npm run build && electron-builder",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "npm run build && electron-builder --mac",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",
@@ -60,7 +62,7 @@
   },
   "build": {
     "appId": "com.panyw5.texflow",
-    "productName": "texflow",
+    "productName": "TexFlow",
     "directories": {
       "output": "build"
     },
@@ -74,15 +76,25 @@
       "target": [
         {
           "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
+          "arch": ["x64", "arm64"]
         }
       ]
     },
+    "win": {
+      "icon": "img/logo.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
     "dmg": {
-      "title": "texflow",
+      "title": "TexFlow",
       "icon": "img/logo.icns"
     }
   },

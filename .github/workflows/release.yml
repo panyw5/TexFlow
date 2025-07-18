@@ -38,12 +38,6 @@ jobs:
           npm run convert-icon:win
         shell: pwsh
 
-      - name: Build application (skip prebuild on Windows)
-        if: matrix.os == 'windows-latest'
-        run: npm run build && electron-builder
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
       - name: Build application (macOS)
         if: matrix.os == 'macos-latest'
         run: npm run build:all
@@ -53,8 +47,7 @@ jobs:
       - name: Build application (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          npm run build
-          npx electron-builder --win
+          npm run build:win
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 

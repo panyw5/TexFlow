@@ -2,7 +2,7 @@
 export const isDev = process.env.NODE_ENV === 'development';
 
 // Application constants
-export const APP_NAME = 'InsTex';
+export const APP_NAME = 'TexFlow';
 export const APP_VERSION = '1.0.0';
 
 // Window constants

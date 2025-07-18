@@ -11,7 +11,7 @@ const TestApp: React.FC = () => {
       fontFamily: 'Arial, sans-serif'
     }}>
       <h1 style={{ fontSize: '24px', marginBottom: '20px' }}>
-        InsTex LaTeX Editor - Test Mode
+        TexFlow LaTeX Editor - Test Mode
       </h1>
       
       <div style={{ 

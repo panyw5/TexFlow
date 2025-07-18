@@ -72,7 +72,7 @@ latex-editor/
 ## Package.json Template
 ```json
 {
-  "name": "latex-editor",
+  "name": "texflow",
   "version": "1.0.0",
   "description": "A lightweight macOS application for editing and previewing LaTeX equations in real-time",
   "main": "dist/main/main.js",
@@ -129,8 +129,8 @@ latex-editor/
     "vite-plugin-electron": "^0.28.1"
   },
   "build": {
-    "appId": "com.yourcompany.latex-editor",
-    "productName": "LaTeX Editor",
+    "appId": "com.yourcompany.texflow",
+    "productName": "TexFlow",
     "directories": {
       "output": "build"
     },
@@ -148,7 +148,7 @@ latex-editor/
       ]
     },
     "dmg": {
-      "title": "LaTeX Editor",
+      "title": "TexFlow",
       "icon": "assets/icon.icns"
     }
   },
@@ -302,8 +302,8 @@ module.exports = {
 
 ### 1. Initialize Project
 ```bash
-mkdir latex-editor
-cd latex-editor
+mkdir texflow
+cd texflow
 npm init -y
 ```
 

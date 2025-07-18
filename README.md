@@ -1,10 +1,10 @@
-# InsTex (beta)
+# TexFlow (beta)
 
 > A modern, lightweight LaTeX equation editor with real-time preview and intelligent autocomplete
 
-![InsTex Interface](img/image.png)
+![TexFlow Interface](img/image.png)
 
-InsTex is a professional LaTeX equation editor designed for mathematicians, scientists, and students who need to create beautiful mathematical expressions quickly and efficiently. Built with modern web technologies and powered by Monaco Editor and KaTeX, it delivers a seamless editing experience with instant visual feedback.
+TexFlow is a professional LaTeX equation editor designed for mathematicians, scientists, and students who need to create beautiful mathematical expressions quickly and efficiently. Built with modern web technologies and powered by Monaco Editor and KaTeX, it delivers a seamless editing experience with instant visual feedback.
 
 ## ✨ Key Features
 
@@ -71,7 +71,7 @@ $$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$
 
 1. **Download** the latest release for macOS
 2. **Install** by dragging to Applications folder
-3. **Launch** InsTex and start typing LaTeX
+3. **Launch** TexFlow and start typing LaTeX
 4. **Preview** updates automatically as you type
 
 ## 🛠 Technical Stack

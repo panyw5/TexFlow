@@ -56,6 +56,17 @@ body {
   background-color: transparent !important;
 }
 
+/* Monaco Editor current line highlighting */
+.monaco-editor .current-line {
+  background-color: #2f2e37 !important;
+  border: none !important;
+}
+
+.monaco-editor .view-overlays .current-line {
+  background-color: #2f2e37 !important;
+  border: none !important;
+}
+
 /* Monaco Editor line numbers centering */
 .monaco-editor .margin-view-overlays .line-numbers {
   text-align: center;

@@ -1,4 +1,4 @@
-# LaTeX Editor Development Plan
+# TexFlow Development Plan
 
 ## Executive Summary
 This document outlines the comprehensive development plan for a lightweight macOS LaTeX editor with real-time preview, advanced syntax highlighting, and intelligent autocomplete features.

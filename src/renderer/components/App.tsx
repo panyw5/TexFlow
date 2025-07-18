@@ -146,28 +146,40 @@ const App: React.FC = () => {
             <button
               onClick={handleCopyToClipboard}
               style={{
-                backgroundColor: isCopied ? '#10b981' : 'rgb(52, 48, 51)',
+                backgroundColor: isCopied ? '#10b981' : '#3a3a3a',
                 color: 'white',
-                padding: '16px',
+                padding: '8px',
                 borderRadius: '6px',
-                border: 'none',
+                border: '1px solid rgba(85, 85, 85, 0.5)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '72px',
-                height: '72px',
-                transition: 'background-color 0.2s ease',
+                width: '36px',
+                height: '36px',
+                transition: 'all 0.2s ease',
                 WebkitAppRegion: 'no-drag'
+              }}
+              onMouseEnter={(e) => {
+                if (!isCopied) {
+                  e.currentTarget.style.backgroundColor = '#4a4a4a';
+                  e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isCopied) {
+                  e.currentTarget.style.backgroundColor = '#3a3a3a';
+                  e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
+                }
               }}
               title="Copy LaTeX to clipboard (⌘⇧C)"
             >
               {isCopied ? (
-                <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
               ) : (
-                <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                 </svg>
               )}
@@ -177,27 +189,36 @@ const App: React.FC = () => {
             <button
               onClick={handleToggleLayout}
               style={{
-                backgroundColor: 'rgb(52, 48, 51)',
+                backgroundColor: '#3a3a3a',
                 color: 'white',
-                padding: '16px',
+                padding: '8px',
                 borderRadius: '6px',
-                border: 'none',
+                border: '1px solid rgba(85, 85, 85, 0.5)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '72px',
-                height: '72px',
+                width: '36px',
+                height: '36px',
+                transition: 'all 0.2s ease',
                 WebkitAppRegion: 'no-drag'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#4a4a4a';
+                e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#3a3a3a';
+                e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
               }}
               title="Toggle layout direction"
             >
               {state.splitDirection === 'horizontal' ? (
-                <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M3 3h18v4H3V3zm0 6h8v12H3V9zm10 0h8v12h-8V9z"/>
                 </svg>
               ) : (
-                <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M3 3h4v18H3V3zm6 0h12v8H9V3zm0 10h12v8H9v-8z"/>
                 </svg>
               )}
@@ -207,22 +228,31 @@ const App: React.FC = () => {
             <button
               onClick={handleNewDocument}
               style={{
-                backgroundColor: 'rgb(52, 48, 51)',
+                backgroundColor: '#3a3a3a',
                 color: 'white',
-                padding: '16px',
+                padding: '8px',
                 borderRadius: '6px',
-                border: 'none',
+                border: '1px solid rgba(85, 85, 85, 0.5)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '72px',
-                height: '72px',
+                width: '36px',
+                height: '36px',
+                transition: 'all 0.2s ease',
                 WebkitAppRegion: 'no-drag'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#4a4a4a';
+                e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#3a3a3a';
+                e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
               }}
               title="New document"
             >
-              <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
               </svg>
             </button>
@@ -231,22 +261,35 @@ const App: React.FC = () => {
             <button
               onClick={handleTogglePin}
               style={{
-                backgroundColor: isPinned ? '#10b981' : 'rgb(52, 48, 51)',
+                backgroundColor: isPinned ? '#10b981' : '#3a3a3a',
                 color: 'white',
-                padding: '16px',
+                padding: '8px',
                 borderRadius: '6px',
-                border: 'none',
+                border: '1px solid rgba(85, 85, 85, 0.5)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '72px',
-                height: '72px',
+                width: '36px',
+                height: '36px',
+                transition: 'all 0.2s ease',
                 WebkitAppRegion: 'no-drag'
+              }}
+              onMouseEnter={(e) => {
+                if (!isPinned) {
+                  e.currentTarget.style.backgroundColor = '#4a4a4a';
+                  e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isPinned) {
+                  e.currentTarget.style.backgroundColor = '#3a3a3a';
+                  e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
+                }
               }}
               title={isPinned ? "Unpin window" : "Pin window on top"}
             >
-              <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>
               </svg>
             </button>

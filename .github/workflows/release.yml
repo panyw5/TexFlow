@@ -37,15 +37,15 @@ jobs:
             build/latest-mac.yml
           draft: false
           prerelease: true
-          name: "InsTex v${{ github.ref_name }} (Beta)"
+          name: "TexFlow v${{ github.ref_name }} (Beta)"
           body: |
-            ## InsTex Beta Release
+            ## TexFlow Beta Release
             
-            This is a beta version of InsTex - LaTeX equation editor.
+            This is a beta version of TexFlow - LaTeX equation editor.
             
             ### Downloads
-            - **Intel Mac**: InsTex-${{ github.ref_name }}.dmg
-            - **Apple Silicon**: InsTex-${{ github.ref_name }}-arm64.dmg
+            - **Intel Mac**: TexFlow-${{ github.ref_name }}.dmg
+            - **Apple Silicon**: TexFlow-${{ github.ref_name }}-arm64.dmg
             
             ### What's New
             - Initial beta release

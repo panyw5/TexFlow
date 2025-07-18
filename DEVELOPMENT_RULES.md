@@ -1,4 +1,4 @@
-# LaTeX Editor Development Rules & Guidelines
+# TexFlow Development Rules & Guidelines
 
 ## Project Overview
 A lightweight macOS Electron application for editing and previewing LaTeX equations in real-time with advanced syntax highlighting and autocomplete features.

@@ -28,13 +28,13 @@ TexFlow is a professional LaTeX equation editor designed for mathematicians, sci
 
 ### ⚡ Productivity Features
 - **Lightning-fast startup** - ready to use in seconds
-- **Pin to top** - keep InsTex above other windows while working
+- **Pin to top** - keep TexFlow above other windows while working
 - **One-click copy** - instantly copy LaTeX code to clipboard
 - **Keyboard-first design** - comprehensive shortcuts for power users
 
 ## 🔧 Supported LaTeX
 
-InsTex excels at mathematical content with comprehensive support for:
+TexFlow excels at mathematical content with comprehensive support for:
 
 ```latex
 % Inline and display equations

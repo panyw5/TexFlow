@@ -11,6 +11,9 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     minify: true,
+    rollupOptions: {
+      input: path.resolve(__dirname, 'src/renderer/index.html')
+    }
   },
   resolve: {
     alias: {
@@ -23,5 +26,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: 'localhost',
+    strictPort: true,
   },
 });

@@ -46,8 +46,11 @@ class Application {
     const preloadPath = isDevEnv
       ? path.join(__dirname, '../preload/preload-standalone.js')
       : path.join(__dirname, '../preload/preload-standalone.js');
+    
     console.log('[main] __dirname:', __dirname);
     console.log('[main] preload path:', preloadPath);
+    console.log('[main] isDev:', isDevEnv);
+    
     // Create the browser window
     this.mainWindow = new BrowserWindow({
       width: 1200,
@@ -59,13 +62,19 @@ class Application {
         nodeIntegration: false,
         contextIsolation: true,
         preload: preloadPath,
+        webSecurity: false, // Add this for development
       },
       show: false, // Don't show until ready
     });
 
     // Load the app
     if (isDev) {
-      this.mainWindow.loadURL('http://localhost:3000');
+      console.log('[main] Loading dev server at http://localhost:3000');
+      this.mainWindow.loadURL('http://localhost:3000').catch(err => {
+        console.error('[main] Failed to load dev server:', err);
+        // Fallback to file protocol
+        this.mainWindow?.loadFile(path.join(__dirname, '../renderer/index.html'));
+      });
       this.mainWindow.webContents.openDevTools();
     } else {
       this.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));

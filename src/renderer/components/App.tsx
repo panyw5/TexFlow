@@ -103,7 +103,9 @@ const App: React.FC = () => {
 
   const [isPinned, setIsPinned] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [showOutputDropdown, setShowOutputDropdown] = useState(false);
   const editorRef = useRef<any>(null);
+  const outputDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleTogglePin = useCallback(async () => {
     try {
@@ -118,6 +120,33 @@ const App: React.FC = () => {
       console.error('Failed to toggle pin:', error);
     }
   }, []);
+
+  const handleOutput = useCallback(() => {
+    setShowOutputDropdown(prev => !prev);
+  }, []);
+
+  const handleOutputFormat = useCallback((format: 'png' | 'jpg' | 'pdf' | 'svg') => {
+    console.log(`Export as ${format.toUpperCase()}`);
+    // TODO: Implement actual export functionality
+    setShowOutputDropdown(false);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (outputDropdownRef.current && !outputDropdownRef.current.contains(event.target as Node)) {
+        setShowOutputDropdown(false);
+      }
+    };
+
+    if (showOutputDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showOutputDropdown]);
 
   // Test version with explicit inline styles to override any CSS conflicts
   return (
@@ -293,6 +322,98 @@ const App: React.FC = () => {
                 <path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>
               </svg>
             </button>
+
+            {/* Output */}
+            <div style={{ position: 'relative' }} ref={outputDropdownRef}>
+              <button
+                onClick={handleOutput}
+                style={{
+                  backgroundColor: showOutputDropdown ? '#4a4a4a' : '#3a3a3a',
+                  color: 'white',
+                  padding: '8px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(85, 85, 85, 0.5)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '36px',
+                  height: '36px',
+                  transition: 'all 0.2s ease',
+                  WebkitAppRegion: 'no-drag'
+                }}
+                onMouseEnter={(e) => {
+                  if (!showOutputDropdown) {
+                    e.currentTarget.style.backgroundColor = '#4a4a4a';
+                    e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!showOutputDropdown) {
+                    e.currentTarget.style.backgroundColor = '#3a3a3a';
+                    e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
+                  }
+                }}
+                title="Export output"
+              >
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showOutputDropdown && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: '0',
+                    marginTop: '4px',
+                    backgroundColor: '#2a2a2a',
+                    border: '1px solid rgba(85, 85, 85, 0.5)',
+                    borderRadius: '6px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                    zIndex: 1000,
+                    minWidth: '120px',
+                    WebkitAppRegion: 'no-drag'
+                  }}
+                >
+                  {[
+                    { format: 'png' as const, label: 'PNG' },
+                    { format: 'jpg' as const, label: 'JPG' },
+                    { format: 'pdf' as const, label: 'PDF' },
+                    { format: 'svg' as const, label: 'SVG' }
+                  ].map(({ format, label }) => (
+                    <button
+                      key={format}
+                      onClick={() => handleOutputFormat(format)}
+                      style={{
+                        width: '50%',
+                        padding: '15px 12px',
+                        backgroundColor: 'transparent',
+                        color: 'white',
+                        border: 'none',
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        transition: 'background-color 0.2s ease',
+                        borderRadius: format === 'png' ? '6px 6px 0 0' : format === 'svg' ? '0 0 6px 6px' : '0'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#3a3a3a';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            
           </div>
         </div>
       </div>

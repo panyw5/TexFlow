@@ -54,7 +54,7 @@ class Application {
       height: 800,
       minWidth: 800,
       minHeight: 600,
-      titleBarStyle: 'hiddenInset',
+      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,

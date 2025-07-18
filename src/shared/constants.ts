@@ -3,7 +3,7 @@ export const isDev = process.env.NODE_ENV === 'development';
 
 // Application constants
 export const APP_NAME = 'TexFlow';
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '0.7.0';
 
 // Window constants
 export const DEFAULT_WINDOW_WIDTH = 1200;

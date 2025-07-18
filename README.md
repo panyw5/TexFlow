@@ -85,7 +85,7 @@ $$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$
 
 ## 🔮 Roadmap
 
-- [ ] **Optimization**
+- [ ] **Optimization**: more responsive, smaller size
 - [ ] **Export capabilities** - img, svg, pdf or tex output, drag and drop
 - [ ] **More shortcut/command** - better autocomplete, more short-cuts
 - [ ] **Document history** - version control for your equations

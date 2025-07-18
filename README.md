@@ -1,14 +1,15 @@
-# TexFlow (beta)
+# TexFlow (beta; vibe code product)
 
 > A modern, lightweight LaTeX equation editor with real-time preview and intelligent autocomplete
 
 ![TexFlow Interface](img/image.png)
 
-TexFlow is a professional LaTeX equation editor designed for mathematicians, scientists, and students who need to create beautiful mathematical expressions quickly and efficiently. Built with modern web technologies and powered by Monaco Editor and KaTeX, it delivers a seamless editing experience with instant visual feedback.
+TexFlow is a LaTeX equation editor designed for mathematicians, scientists, and students who need to create beautiful mathematical expressions quickly and efficiently. Built with modern web technologies and powered by Monaco Editor and KaTeX, it delivers a seamless editing experience with instant visual feedback.
 
 ## ✨ Key Features
 
 ### 🚀 Real-Time Preview
+- **MacOS and Windows** - cross-platform support
 - **Instant rendering** with KaTeX engine - see your equations come to life as you type
 - **Synchronized editing** - changes appear immediately in the preview panel
 - **Error highlighting** - instant feedback on syntax errors with helpful suggestions
@@ -69,7 +70,7 @@ $$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$
 
 ## 🚀 Getting Started
 
-1. **Download** the latest release for macOS
+1. **Download** the latest release for macOS and Windows
 2. **Install** by dragging to Applications folder
 3. **Launch** TexFlow and start typing LaTeX
 4. **Preview** updates automatically as you type
@@ -84,6 +85,7 @@ $$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$
 
 ## 🔮 Roadmap
 
+- [ ] **Optimization**
 - [ ] **Export capabilities** - img, svg, pdf or tex output, drag and drop
 - [ ] **More shortcut/command** - better autocomplete, more short-cuts
 - [ ] **Document history** - version control for your equations

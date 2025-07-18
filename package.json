@@ -13,7 +13,7 @@
     "build:main": "tsc -p tsconfig.main.json",
     "build:preload": "tsc -p tsconfig.preload.json",
     "build:all": "npm run build && electron-builder",
-    "build:win": "npm run build && electron-builder --win",
+    "build:win": "npm run build && npx electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
     "test": "jest",
     "test:watch": "jest --watch",

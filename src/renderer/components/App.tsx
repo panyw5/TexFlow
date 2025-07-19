@@ -194,10 +194,6 @@ const App: React.FC = () => {
         document.body.removeChild(link);
       }
 
-      // Clean up object URLs
-      if (format === 'pdf' || format === 'svg') {
-        URL.revokeObjectURL(dataUrl);
-      }
 
     } catch (error) {
       console.error(`Failed to export as ${format}:`, error);
@@ -403,13 +399,14 @@ const App: React.FC = () => {
             <div style={{ position: 'relative' }} ref={outputDropdownRef}>
               <button
                 onClick={handleOutput}
+                disabled={!state.content.trim()}
                 style={{
-                  backgroundColor: showOutputDropdown ? '#4a4a4a' : '#3a3a3a',
-                  color: 'white',
+                  backgroundColor: !state.content.trim() ? '#2a2a2a' : (showOutputDropdown ? '#4a4a4a' : '#3a3a3a'),
+                  color: !state.content.trim() ? '#666' : 'white',
                   padding: '8px',
                   borderRadius: '6px',
                   border: '1px solid rgba(85, 85, 85, 0.5)',
-                  cursor: 'pointer',
+                  cursor: !state.content.trim() ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -419,18 +416,18 @@ const App: React.FC = () => {
                   WebkitAppRegion: 'no-drag'
                 }}
                 onMouseEnter={(e) => {
-                  if (!showOutputDropdown) {
+                  if (state.content.trim() && !showOutputDropdown) {
                     e.currentTarget.style.backgroundColor = '#4a4a4a';
                     e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!showOutputDropdown) {
+                  if (state.content.trim() && !showOutputDropdown) {
                     e.currentTarget.style.backgroundColor = '#3a3a3a';
                     e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
                   }
                 }}
-                title="Export output"
+                title={!state.content.trim() ? "No content to export" : "Export output"}
               >
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>

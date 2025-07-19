@@ -102,6 +102,7 @@ const App: React.FC = () => {
   const [isPinned, setIsPinned] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [showOutputDropdown, setShowOutputDropdown] = useState(false);
+  const [exportStatus, setExportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const editorRef = useRef<any>(null);
   const outputDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -126,12 +127,10 @@ const App: React.FC = () => {
   const handleOutputFormat = useCallback(async (format: 'png' | 'jpg') => {
     try {
       // Get the rendered math element - prioritize the actual math content
-      // Get the specific math element instead of the entire preview
       let mathElement = document.querySelector('.katex-display .katex') || 
                        document.querySelector('.katex');
       
       if (!mathElement) {
-        // Fallback to preview container if no math found
         mathElement = document.querySelector('.latex-preview-content');
       }
 
@@ -144,7 +143,6 @@ const App: React.FC = () => {
         case 'jpg':
           const html2canvas = (await import('html2canvas')).default;
           
-          // Temporarily override text color to black for export
           const originalColor = (mathElement as HTMLElement).style.color;
           (mathElement as HTMLElement).style.color = '#000000';
           
@@ -157,7 +155,6 @@ const App: React.FC = () => {
             logging: false,
           });
           
-          // Restore original color
           (mathElement as HTMLElement).style.color = originalColor;
           
           dataUrl = canvas.toDataURL(`image/${format === 'jpg' ? 'jpeg' : format}`, 0.95);
@@ -168,36 +165,40 @@ const App: React.FC = () => {
           return;
       }
 
-      // Generate filename and save
       fileName = `latex-export-${Date.now()}.${fileExtension}`;
 
       if (window.electronAPI) {
         const response = await fetch(dataUrl);
         const buffer = await response.arrayBuffer();
+        const uint8Array = new Uint8Array(buffer);
+        const base64String = btoa(String.fromCharCode(...uint8Array));
         const result = await window.electronAPI.saveBinaryFile(
-          Buffer.from(buffer).toString('base64'), 
+          base64String, 
           fileName
         );
         
         if (result.success) {
-          alert(`Successfully exported as ${format.toUpperCase()}`);
+          setExportStatus('success');
+          setTimeout(() => setExportStatus('idle'), 1500);
         } else {
-          alert(`Export failed: ${result.error}`);
+          setExportStatus('error');
+          setTimeout(() => setExportStatus('idle'), 1500);
         }
       } else {
-        // Browser fallback
         const link = document.createElement('a');
         link.download = fileName;
         link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        setExportStatus('success');
+        setTimeout(() => setExportStatus('idle'), 1500);
       }
-
 
     } catch (error) {
       console.error(`Failed to export as ${format}:`, error);
-      alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setExportStatus('error');
+      setTimeout(() => setExportStatus('idle'), 1500);
     } finally {
       setShowOutputDropdown(false);
     }
@@ -401,7 +402,10 @@ const App: React.FC = () => {
                 onClick={handleOutput}
                 disabled={!state.content.trim()}
                 style={{
-                  backgroundColor: !state.content.trim() ? '#2a2a2a' : (showOutputDropdown ? '#4a4a4a' : '#3a3a3a'),
+                  backgroundColor: !state.content.trim() ? '#2a2a2a' : 
+                                  exportStatus === 'success' ? '#10b981' :
+                                  exportStatus === 'error' ? '#ef4444' :
+                                  (showOutputDropdown ? '#4a4a4a' : '#3a3a3a'),
                   color: !state.content.trim() ? '#666' : 'white',
                   padding: '8px',
                   borderRadius: '6px',
@@ -416,22 +420,32 @@ const App: React.FC = () => {
                   WebkitAppRegion: 'no-drag'
                 }}
                 onMouseEnter={(e) => {
-                  if (state.content.trim() && !showOutputDropdown) {
+                  if (state.content.trim() && !showOutputDropdown && exportStatus === 'idle') {
                     e.currentTarget.style.backgroundColor = '#4a4a4a';
                     e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (state.content.trim() && !showOutputDropdown) {
+                  if (state.content.trim() && !showOutputDropdown && exportStatus === 'idle') {
                     e.currentTarget.style.backgroundColor = '#3a3a3a';
                     e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
                   }
                 }}
                 title={!state.content.trim() ? "No content to export" : "Export output"}
               >
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                </svg>
+                {exportStatus === 'success' ? (
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                ) : exportStatus === 'error' ? (
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                  </svg>
+                )}
               </button>
 
               {/* Dropdown Menu */}

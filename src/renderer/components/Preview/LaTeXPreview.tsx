@@ -7,6 +7,11 @@ interface LaTeXPreviewProps {
   content: string;
   theme: 'light' | 'dark';
   fontSize?: number;
+  onExport?: (format: 'png' | 'jpg') => void;
+  exportStatus?: 'idle' | 'success' | 'error';
+  showOutputDropdown?: boolean;
+  onToggleOutputDropdown?: () => void;
+  outputDropdownRef?: React.RefObject<HTMLDivElement>;
 }
 
 interface RenderError {
@@ -19,6 +24,11 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
   content,
   theme,
   fontSize = 32, // Doubled from 16
+  onExport,
+  exportStatus = 'idle',
+  showOutputDropdown = false,
+  onToggleOutputDropdown,
+  outputDropdownRef
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [renderedContent, setRenderedContent] = useState<string>('');
@@ -234,13 +244,7 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
   }, [debouncedRender]);
 
   return (
-    <div style={{
-      height: '100%',
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: '#2b2b2b'
-    }}>
+    <div style={{ position: 'relative', height: '100%' }}>
       {/* Error display */}
       {errors.length > 0 && (
         <div style={{
@@ -289,6 +293,97 @@ export const LaTeXPreview: React.FC<LaTeXPreviewProps> = ({
         }}
         dangerouslySetInnerHTML={{ __html: renderedContent }}
       />
+
+      {/* Export Button - positioned at bottom right */}
+      {onExport && onToggleOutputDropdown && (
+        <div style={{ position: 'absolute', bottom: '12px', right: '12px' }} ref={outputDropdownRef}>
+          <button
+            onClick={onToggleOutputDropdown}
+            disabled={!content.trim()}
+            style={{
+              backgroundColor: !content.trim() ? '#2a2a2a' : 
+                              exportStatus === 'success' ? '#10b981' :
+                              exportStatus === 'error' ? '#ef4444' :
+                              (showOutputDropdown ? '#4a4a4a' : '#3a3a3a'),
+              color: !content.trim() ? '#666' : 'white',
+              padding: '8px',
+              borderRadius: '6px',
+              border: '1px solid rgba(85, 85, 85, 0.5)',
+              cursor: !content.trim() ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '36px',
+              height: '36px',
+              transition: 'all 0.2s ease',
+              zIndex: 10
+            }}
+            title={!content.trim() ? "No content to export" : "Export output"}
+          >
+            {exportStatus === 'success' ? (
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+            ) : exportStatus === 'error' ? (
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+            )}
+          </button>
+
+          {/* Dropdown Menu */}
+          {showOutputDropdown && (
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                right: '0',
+                marginBottom: '4px',
+                backgroundColor: '#2a2a2a',
+                border: '1px solid rgba(85, 85, 85, 0.5)',
+                borderRadius: '6px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                zIndex: 1000,
+                minWidth: '120px'
+              }}
+            >
+              {[
+                { format: 'png' as const, label: 'PNG' },
+                { format: 'jpg' as const, label: 'JPG' }
+              ].map(({ format, label }) => (
+                <button
+                  key={format}
+                  onClick={() => onExport(format)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: 'transparent',
+                    color: 'white',
+                    border: 'none',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    transition: 'background-color 0.2s ease',
+                    borderRadius: format === 'png' ? '6px 6px 0 0' : '0 0 6px 6px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3a3a3a';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

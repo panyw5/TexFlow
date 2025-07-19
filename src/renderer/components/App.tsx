@@ -244,49 +244,6 @@ const App: React.FC = () => {
       >
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', width: '100%' }}>
           <div style={{ display: 'flex', gap: '6px' }}>
-            {/* Copy to Clipboard */}
-            <button
-              onClick={handleCopyToClipboard}
-              style={{
-                backgroundColor: isCopied ? '#10b981' : '#3a3a3a',
-                color: 'white',
-                padding: '8px',
-                borderRadius: '6px',
-                border: '1px solid rgba(85, 85, 85, 0.5)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '36px',
-                height: '36px',
-                transition: 'all 0.2s ease',
-                WebkitAppRegion: 'no-drag'
-              }}
-              onMouseEnter={(e) => {
-                if (!isCopied) {
-                  e.currentTarget.style.backgroundColor = '#4a4a4a';
-                  e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isCopied) {
-                  e.currentTarget.style.backgroundColor = '#3a3a3a';
-                  e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
-                }
-              }}
-              title="Copy LaTeX to clipboard (⌘⇧C)"
-            >
-              {isCopied ? (
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                </svg>
-              ) : (
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                </svg>
-              )}
-            </button>
-
             {/* Toggle Layout */}
             <button
               onClick={handleToggleLayout}
@@ -395,110 +352,6 @@ const App: React.FC = () => {
                 <path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>
               </svg>
             </button>
-
-            {/* Output */}
-            <div style={{ position: 'relative' }} ref={outputDropdownRef}>
-              <button
-                onClick={handleOutput}
-                disabled={!state.content.trim()}
-                style={{
-                  backgroundColor: !state.content.trim() ? '#2a2a2a' : 
-                                  exportStatus === 'success' ? '#10b981' :
-                                  exportStatus === 'error' ? '#ef4444' :
-                                  (showOutputDropdown ? '#4a4a4a' : '#3a3a3a'),
-                  color: !state.content.trim() ? '#666' : 'white',
-                  padding: '8px',
-                  borderRadius: '6px',
-                  border: '1px solid rgba(85, 85, 85, 0.5)',
-                  cursor: !state.content.trim() ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '36px',
-                  height: '36px',
-                  transition: 'all 0.2s ease',
-                  WebkitAppRegion: 'no-drag'
-                }}
-                onMouseEnter={(e) => {
-                  if (state.content.trim() && !showOutputDropdown && exportStatus === 'idle') {
-                    e.currentTarget.style.backgroundColor = '#4a4a4a';
-                    e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (state.content.trim() && !showOutputDropdown && exportStatus === 'idle') {
-                    e.currentTarget.style.backgroundColor = '#3a3a3a';
-                    e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
-                  }
-                }}
-                title={!state.content.trim() ? "No content to export" : "Export output"}
-              >
-                {exportStatus === 'success' ? (
-                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                  </svg>
-                ) : exportStatus === 'error' ? (
-                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                  </svg>
-                ) : (
-                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                  </svg>
-                )}
-              </button>
-
-              {/* Dropdown Menu */}
-              {showOutputDropdown && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: '0',
-                    marginTop: '4px',
-                    backgroundColor: '#2a2a2a',
-                    border: '1px solid rgba(85, 85, 85, 0.5)',
-                    borderRadius: '6px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                    zIndex: 1000,
-                    minWidth: '120px',
-                    WebkitAppRegion: 'no-drag'
-                  }}
-                >
-                  {[
-                    { format: 'png' as const, label: 'PNG' },
-                    { format: 'jpg' as const, label: 'JPG' }
-                  ].map(({ format, label }) => (
-                    <button
-                      key={format}
-                      onClick={() => handleOutputFormat(format)}
-                      style={{
-                        width: '50%',
-                        padding: '15px 12px',
-                        backgroundColor: 'transparent',
-                        color: 'white',
-                        border: 'none',
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        transition: 'background-color 0.2s ease',
-                        borderRadius: format === 'png' ? '6px 6px 0 0' : format === 'svg' ? '0 0 6px 6px' : '0'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#3a3a3a';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            
           </div>
         </div>
       </div>
@@ -515,10 +368,17 @@ const App: React.FC = () => {
             value={state.content}
             onChange={handleContentChange}
             theme={state.theme}
+            onCopyToClipboard={handleCopyToClipboard}
+            isCopied={isCopied}
           />
           <LaTeXPreview
             content={state.content}
             theme={state.theme}
+            onExport={handleOutputFormat}
+            exportStatus={exportStatus}
+            showOutputDropdown={showOutputDropdown}
+            onToggleOutputDropdown={handleOutput}
+            outputDropdownRef={outputDropdownRef}
           />
         </ResizableSplitPane>
       </div>

@@ -8,6 +8,8 @@ interface LaTeXEditorProps {
   theme: 'light' | 'dark';
   fontSize?: number;
   readOnly?: boolean;
+  onCopyToClipboard?: () => void;
+  isCopied?: boolean;
 }
 
 export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
@@ -16,6 +18,8 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
   theme,
   fontSize = 28, // Doubled from 14
   readOnly = false,
+  onCopyToClipboard,
+  isCopied = false
 }, ref) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const monacoRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -269,20 +273,55 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
   );
 
   return (
-    <div style={{
-      height: '100%',
-      width: '100%',
-      backgroundColor: '#27262F'
-    }}>
-      <div
-        ref={editorRef}
-        style={{
-          height: '100%',
-          width: '100%',
-          position: 'relative',
-          backgroundColor: '#27262F'
-        }}
-      />
+    <div style={{ position: 'relative', height: '100%' }}>
+      {/* Monaco Editor */}
+      <div style={{ height: '100%' }}>
+        <div
+          ref={editorRef}
+          style={{
+            height: '100%',
+            width: '100%',
+            position: 'relative',
+            backgroundColor: '#27262F'
+          }}
+        />
+      </div>
+      
+      {/* Copy Button - positioned at bottom right */}
+      {onCopyToClipboard && (
+        <button
+          onClick={onCopyToClipboard}
+          style={{
+            position: 'absolute',
+            bottom: '12px',
+            right: '12px',
+            backgroundColor: isCopied ? '#10b981' : '#3a3a3a',
+            color: 'white',
+            padding: '8px',
+            borderRadius: '6px',
+            border: '1px solid rgba(85, 85, 85, 0.5)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '36px',
+            height: '36px',
+            transition: 'all 0.2s ease',
+            zIndex: 10
+          }}
+          title="Copy LaTeX to clipboard (⌘⇧C)"
+        >
+          {isCopied ? (
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+          ) : (
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+            </svg>
+          )}
+        </button>
+      )}
     </div>
   );
 });

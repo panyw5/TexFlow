@@ -123,15 +123,9 @@ const App: React.FC = () => {
     setShowOutputDropdown(prev => !prev);
   }, []);
 
-  const handleOutputFormat = useCallback(async (format: 'png' | 'jpg' | 'pdf' | 'svg') => {
+  const handleOutputFormat = useCallback(async (format: 'png' | 'jpg') => {
     try {
-      console.log(`Starting export as ${format}`);
-      
-      // Debug: Let's see what elements exist
-      console.log('All elements with "preview" in class:', document.querySelectorAll('[class*="preview"]'));
-      console.log('All elements with "latex" in class:', document.querySelectorAll('[class*="latex"]'));
-      console.log('All divs in document:', document.querySelectorAll('div').length);
-      
+      // Get the rendered math element - prioritize the actual math content
       // Get the specific math element instead of the entire preview
       let mathElement = document.querySelector('.katex-display .katex') || 
                        document.querySelector('.katex');
@@ -139,14 +133,6 @@ const App: React.FC = () => {
       if (!mathElement) {
         // Fallback to preview container if no math found
         mathElement = document.querySelector('.latex-preview-content');
-      }
-      
-      console.log('Math element found:', mathElement);
-      
-      if (!mathElement) {
-        console.error('Math element not found');
-        alert('Math content not found. Make sure LaTeX is rendered.');
-        return;
       }
 
       let dataUrl: string;
@@ -156,130 +142,56 @@ const App: React.FC = () => {
       switch (format) {
         case 'png':
         case 'jpg':
-          console.log('Capturing math element with html2canvas...');
-          // Dynamic import for html2canvas
           const html2canvas = (await import('html2canvas')).default;
+          
+          // Temporarily override text color to black for export
+          const originalColor = (mathElement as HTMLElement).style.color;
+          (mathElement as HTMLElement).style.color = '#000000';
+          
           const canvas = await html2canvas(mathElement as HTMLElement, {
-            backgroundColor: format === 'png' ? null : '#ffffff', // Transparent for PNG
-            scale: 8, // Ultra-high resolution for crisp math
-            useCORS: true,
-            allowTaint: true,
-            removeContainer: true,
-            // Let html2canvas determine optimal size based on content
-            logging: false,
-            // Add minimal padding
-            x: 0,
-            y: 0,
-            scrollX: 0,
-            scrollY: 0,
-          });
-          console.log('Canvas created:', canvas.width, 'x', canvas.height);
-          dataUrl = canvas.toDataURL(`image/${format}`, 0.95);
-          fileExtension = format;
-          break;
-
-        case 'pdf':
-          // Dynamic import for jsPDF
-          const { jsPDF } = await import('jspdf');
-          const html2canvasPdf = (await import('html2canvas')).default;
-          const canvas2 = await html2canvasPdf(mathElement as HTMLElement, {
-            backgroundColor: '#ffffff',
+            backgroundColor: format === 'png' ? null : '#ffffff',
             scale: 8,
             useCORS: true,
             allowTaint: true,
             removeContainer: true,
+            logging: false,
           });
           
-          const imgData = canvas2.toDataURL('image/png');
-          const pdf = new jsPDF();
-          const imgWidth = 210;
-          const pageHeight = 295;
-          const imgHeight = (canvas2.height * imgWidth) / canvas2.width;
-          let heightLeft = imgHeight;
-
-          let position = 0;
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-
-          while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-          }
-
-          const pdfBlob = pdf.output('blob');
-          dataUrl = URL.createObjectURL(pdfBlob);
-          fileExtension = 'pdf';
-          break;
-
-        case 'svg':
-          // Extract SVG content
-          const svgElement = mathElement.querySelector('svg');
-          if (svgElement) {
-            const svgData = new XMLSerializer().serializeToString(svgElement);
-            const svgBlob = new Blob([svgData], { type: 'image/svg+xml' });
-            dataUrl = URL.createObjectURL(svgBlob);
-          } else {
-            // Fallback: convert to SVG using canvas
-            const html2canvasSvg = (await import('html2canvas')).default;
-            const canvas3 = await html2canvasSvg(mathElement as HTMLElement, {
-              backgroundColor: null,
-              scale: 8,
-              useCORS: true,
-              allowTaint: true,
-              removeContainer: true,
-            });
-            // Note: This creates a raster SVG, not true vector
-            const imgData3 = canvas3.toDataURL('image/png');
-            const svgContent = `
-              <svg xmlns="http://www.w3.org/2000/svg" width="${canvas3.width}" height="${canvas3.height}">
-                <image href="${imgData3}" width="${canvas3.width}" height="${canvas3.height}"/>
-              </svg>
-            `;
-            const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
-            dataUrl = URL.createObjectURL(svgBlob);
-          }
-          fileExtension = 'svg';
+          // Restore original color
+          (mathElement as HTMLElement).style.color = originalColor;
+          
+          dataUrl = canvas.toDataURL(`image/${format === 'jpg' ? 'jpeg' : format}`, 0.95);
+          fileExtension = format;
           break;
 
         default:
           return;
       }
 
-      // Generate filename
+      // Generate filename and save
       fileName = `latex-export-${Date.now()}.${fileExtension}`;
 
-      // Use Electron's save dialog
       if (window.electronAPI) {
-        console.log('Using Electron API to save file...');
-        // Convert dataUrl to buffer for Electron
         const response = await fetch(dataUrl);
         const buffer = await response.arrayBuffer();
-        
-        // Save file through Electron
         const result = await window.electronAPI.saveBinaryFile(
           Buffer.from(buffer).toString('base64'), 
           fileName
         );
-        console.log('Save result:', result);
+        
         if (result.success) {
-          console.log(`Exported as ${format.toUpperCase()}: ${result.filePath}`);
           alert(`Successfully exported as ${format.toUpperCase()}`);
         } else {
-          console.error('Save failed:', result.error);
           alert(`Export failed: ${result.error}`);
         }
       } else {
-        console.log('Using browser download fallback...');
-        // Fallback: browser download
+        // Browser fallback
         const link = document.createElement('a');
         link.download = fileName;
         link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        alert(`Downloaded as ${fileName}`);
       }
 
       // Clean up object URLs
@@ -289,6 +201,7 @@ const App: React.FC = () => {
 
     } catch (error) {
       console.error(`Failed to export as ${format}:`, error);
+      alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setShowOutputDropdown(false);
     }
@@ -520,7 +433,7 @@ const App: React.FC = () => {
                 title="Export output"
               >
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                 </svg>
               </button>
 
@@ -543,9 +456,7 @@ const App: React.FC = () => {
                 >
                   {[
                     { format: 'png' as const, label: 'PNG' },
-                    { format: 'jpg' as const, label: 'JPG' },
-                    { format: 'pdf' as const, label: 'PDF' },
-                    { format: 'svg' as const, label: 'SVG' }
+                    { format: 'jpg' as const, label: 'JPG' }
                   ].map(({ format, label }) => (
                     <button
                       key={format}

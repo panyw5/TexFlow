@@ -1,18 +1,10 @@
 // 临时测试：使用完整的Monaco Editor
 import * as monaco from 'monaco-editor';
 
-// 配置工作线程
-self.MonacoEnvironment = {
-  getWorker: function (moduleId, label) {
-    switch (label) {
-      case 'editorWorkerService':
-        return new Worker(
-          new URL('monaco-editor/esm/vs/editor/editor.worker', import.meta.url),
-          { type: 'module' }
-        );
-      default:
-        throw new Error(`Unknown label ${label}`);
-    }
+// 简化工作线程配置，避免构建问题
+(self as any).MonacoEnvironment = {
+  getWorkerUrl: function (moduleId: string, label: string) {
+    return './editor.worker.bundle.js';
   }
 };
 

@@ -10,39 +10,30 @@ export default defineConfig({
     outDir: '../../dist/renderer',
     emptyOutDir: true,
     sourcemap: false,
-    minify: true,
-    chunkSizeWarningLimit: 1000,
+    minify: 'terser',
+    chunkSizeWarningLimit: 500,
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug']
+      }
+    },
     rollupOptions: {
       input: path.resolve(__dirname, 'src/renderer/index.html'),
       output: {
         manualChunks: {
-          'monaco-editor': ['monaco-editor'],
-          'katex': ['katex'],
-          'mathjs': ['mathjs'],
-          'html2canvas': ['html2canvas'],
-          'react-vendor': ['react', 'react-dom'],
-          'lodash': ['lodash.debounce']
-        }
-      },
-      // 优化external配置
-      external: (id) => {
-        // 排除不必要的Monaco语言模块
-        if (id.includes('monaco-editor/esm/vs/basic-languages/') && 
-            !id.includes('latex') && 
-            !id.includes('typescript') && 
-            !id.includes('javascript')) {
-          return true;
-        }
-        // 排除不必要的KaTeX字体
-        if (id.includes('katex/dist/fonts/') && 
-            (id.includes('.ttf') || id.includes('.woff"'))) {
-          return true;
-        }
-        return false;
+          'react-core': ['react', 'react-dom'],
+          'monaco-core': ['monaco-editor/esm/vs/editor/editor.api'],
+          'katex-core': ['katex']
+        },
+        entryFileNames: '[name].[hash:8].js',
+        chunkFileNames: '[name].[hash:8].js',
+        assetFileNames: '[name].[hash:8].[ext]'
       }
     },
-    // CSS优化
-    cssCodeSplit: true,
+    // CSS 优化配置
+    cssCodeSplit: false,
     cssMinify: true
   },
   resolve: {
@@ -59,4 +50,9 @@ export default defineConfig({
     host: 'localhost',
     strictPort: true,
   },
+  optimizeDeps: {
+    // 预构建优化
+    include: ['react', 'react-dom', 'katex'],
+    exclude: ['monaco-editor']
+  }
 });

@@ -3,6 +3,7 @@ import { LaTeXEditor } from './Editor/LaTeXEditor';
 import { LaTeXPreview } from './Preview/LaTeXPreview';
 import { ResizableSplitPane } from './Layout/ResizableSplitPane';
 import { ThemeManager } from '../utils/theme-manager';
+import { ImageExportService, findMathElement } from '../services/image-export';
 
 interface AppState {
   content: string;
@@ -126,55 +127,29 @@ const App: React.FC = () => {
 
   const handleOutputFormat = useCallback(async (format: 'png' | 'jpg') => {
     try {
-      // Get the rendered math element - prioritize the actual math content
-      let mathElement = document.querySelector('.katex-display .katex') || 
-                       document.querySelector('.katex');
+      // 使用新的轻量级导出服务
+      const mathElement = findMathElement();
       
       if (!mathElement) {
-        mathElement = document.querySelector('.latex-preview-content');
+        console.warn('No math content found to export');
+        setExportStatus('error');
+        setTimeout(() => setExportStatus('idle'), 1500);
+        return;
       }
 
-      let dataUrl: string;
-      let fileName: string;
-      let fileExtension: string;
+      const { dataUrl, filename } = await ImageExportService.exportToFile(
+        mathElement, 
+        format
+      );
 
-      switch (format) {
-        case 'png':
-        case 'jpg':
-          const html2canvas = (await import('html2canvas')).default;
-          
-          const originalColor = (mathElement as HTMLElement).style.color;
-          (mathElement as HTMLElement).style.color = '#000000';
-          
-          const canvas = await html2canvas(mathElement as HTMLElement, {
-            backgroundColor: format === 'png' ? null : '#ffffff',
-            scale: 8,
-            useCORS: true,
-            allowTaint: true,
-            removeContainer: true,
-            logging: false,
-          });
-          
-          (mathElement as HTMLElement).style.color = originalColor;
-          
-          dataUrl = canvas.toDataURL(`image/${format === 'jpg' ? 'jpeg' : format}`, 0.95);
-          fileExtension = format;
-          break;
-
-        default:
-          return;
-      }
-
-      fileName = `latex-export-${Date.now()}.${fileExtension}`;
-
-      if (window.electronAPI) {
+      if ((window as any).electronAPI) {
         const response = await fetch(dataUrl);
         const buffer = await response.arrayBuffer();
         const uint8Array = new Uint8Array(buffer);
         const base64String = btoa(String.fromCharCode(...uint8Array));
-        const result = await window.electronAPI.saveBinaryFile(
+        const result = await (window as any).electronAPI.saveBinaryFile(
           base64String, 
-          fileName
+          filename
         );
         
         if (result.success) {
@@ -185,8 +160,9 @@ const App: React.FC = () => {
           setTimeout(() => setExportStatus('idle'), 1500);
         }
       } else {
+        // 浏览器环境下载
         const link = document.createElement('a');
-        link.download = fileName;
+        link.download = filename;
         link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
@@ -261,7 +237,7 @@ const App: React.FC = () => {
                 height: '36px',
                 transition: 'all 0.2s ease',
                 WebkitAppRegion: 'no-drag'
-              }}
+              } as React.CSSProperties}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#4a4a4a';
                 e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
@@ -300,7 +276,7 @@ const App: React.FC = () => {
                 height: '36px',
                 transition: 'all 0.2s ease',
                 WebkitAppRegion: 'no-drag'
-              }}
+              } as React.CSSProperties}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#4a4a4a';
                 e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
@@ -333,7 +309,7 @@ const App: React.FC = () => {
                 height: '36px',
                 transition: 'all 0.2s ease',
                 WebkitAppRegion: 'no-drag'
-              }}
+              } as React.CSSProperties}
               onMouseEnter={(e) => {
                 if (!isPinned) {
                   e.currentTarget.style.backgroundColor = '#4a4a4a';

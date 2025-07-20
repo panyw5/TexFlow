@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import * as monaco from 'monaco-editor';
-import { LaTeXLanguageService } from '../../services/latex-language-service';
+// 临时使用完整Monaco Editor进行测试
+import { editor, defaultEditorOptions, themes, Position, Range, KeyMod, KeyCode, monaco } from '../../services/monaco-full-test';
+import { LaTeXLanguageService } from '../../services/latex-language-service-optimized';
 
 interface LaTeXEditorProps {
   value: string;
@@ -38,40 +39,63 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
     LaTeXLanguageService.register();
 
     // Create editor instance
-    monacoRef.current = monaco.editor.create(editorRef.current, {
+    monacoRef.current = editor.create(editorRef.current, {
       value,
       language: 'latex',
       theme: theme === 'dark' ? 'latex-dark' : 'latex-light',
       fontSize,
+      readOnly,
       fontFamily: "'SF Mono', Monaco, Inconsolata, 'Roboto Mono', Consolas, 'Courier New', monospace",
       lineNumbers: 'on',
       minimap: { enabled: false },
       wordWrap: 'on',
       automaticLayout: true,
       scrollBeyondLastLine: false,
-      readOnly,
+      // 自动完成配置
       suggestOnTriggerCharacters: true,
       quickSuggestions: {
         other: true,
         comments: false,
-        strings: false,
+        strings: true,
       },
       suggest: {
         showKeywords: true,
         showSnippets: true,
         showFunctions: true,
         showVariables: true,
-        filterGraceful: false,
+        filterGraceful: true,
         snippetsPreventQuickSuggestions: false,
         localityBonus: true,
         shareSuggestSelections: false,
         showIcons: true,
         insertMode: 'replace',
+        // 强制启用建议
+        showWords: true,
+        showColors: false,
+        showFields: true,
+        showConstants: true,
+        showConstructors: true,
+        showEnums: true,
+        showEvents: true,
+        showFiles: false,
+        showFolders: false,
+        showInterfaces: true,
+        showIssues: false,
+        showMethods: true,
+        showModules: true,
+        showOperators: true,
+        showProperties: true,
+        showReferences: true,
+        showStructs: true,
+        showTypeParameters: true,
+        showUnits: false,
+        showUsers: false,
+        showValues: true,
       },
       acceptSuggestionOnCommitCharacter: true,
       acceptSuggestionOnEnter: 'on',
       tabCompletion: 'on',
-      quickSuggestionsDelay: 0,
+      quickSuggestionsDelay: 10, // 更快的触发
       parameterHints: {
         enabled: true,
       },
@@ -109,18 +133,13 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
     });
 
     // Set up keyboard shortcuts
-    monacoRef.current.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+    monacoRef.current.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, () => {
       // Save command - will be handled by parent
       console.log('Save shortcut triggered');
     });
 
-    // Add command to manually trigger suggestions
-    monacoRef.current.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
-      monacoRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
-    });
-
     // Add listener for content changes to debug trigger issues
-    monacoRef.current.onDidChangeModelContent((e) => {
+    monacoRef.current.onDidChangeModelContent((e: any) => {
       const model = monacoRef.current?.getModel();
       const position = monacoRef.current?.getPosition();
       if (model && position) {
@@ -131,13 +150,25 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
           lastChar: beforeCursor.slice(-1),
           position: position.column
         });
-
-        // Manually trigger suggestions when backslash is typed
+        
+        // 强制触发自动完成
         if (beforeCursor.endsWith('\\')) {
-          console.log('Backslash detected, manually triggering suggestions');
+          console.log('🚀 Manually triggering suggestions for backslash');
           setTimeout(() => {
-            monacoRef.current?.trigger('editor', 'editor.action.triggerSuggest', {});
-          }, 50);
+            if (monacoRef.current) {
+              // 使用完整Monaco Editor的trigger功能
+              try {
+                monacoRef.current.trigger('keyboard', 'editor.action.triggerSuggest', {});
+              } catch (e) {
+                console.log('triggerSuggest failed:', e);
+                // 如果失败，尝试其他方式
+                const position = monacoRef.current.getPosition();
+                if (position) {
+                  monacoRef.current.focus();
+                }
+              }
+            }
+          }, 100);
         }
       }
     });
@@ -177,7 +208,8 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
   // Update theme
   useEffect(() => {
     if (monacoRef.current) {
-      monaco.editor.setTheme(theme === 'dark' ? 'latex-dark' : 'latex-light');
+      const themeToUse = theme === 'dark' ? 'latex-dark' : 'latex-light';
+      monaco.editor.setTheme(themeToUse);
     }
   }, [theme]);
 
@@ -204,7 +236,7 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
       if (position) {
         editor.executeEdits('insert-text', [
           {
-            range: new monaco.Range(
+            range: new Range(
               position.lineNumber,
               position.column,
               position.lineNumber,
@@ -215,7 +247,7 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
         ]);
         
         // Move cursor to end of inserted text
-        const newPosition = new monaco.Position(
+        const newPosition = new Position(
           position.lineNumber,
           position.column + text.length
         );
@@ -249,7 +281,7 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
         ]);
         
         // Move cursor to end of replaced text
-        const newPosition = new monaco.Position(
+        const newPosition = new Position(
           selection.startLineNumber,
           selection.startColumn + text.length
         );

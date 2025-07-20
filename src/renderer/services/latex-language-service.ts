@@ -1,4 +1,4 @@
-import * as monaco from 'monaco-editor';
+import { languages } from '../services/monaco-optimized';
 import { LATEX_COMMANDS, LaTeXCommand } from '../data/latex-commands';
 
 export class LaTeXLanguageService {

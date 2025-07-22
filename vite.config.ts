@@ -49,10 +49,22 @@ export default defineConfig({
     port: 3000,
     host: 'localhost',
     strictPort: true,
+    // 添加Monaco编辑器Worker支持
+    fs: {
+      allow: ['..', '../node_modules/monaco-editor']
+    }
   },
   optimizeDeps: {
     // 预构建优化
     include: ['react', 'react-dom', 'katex'],
     exclude: ['monaco-editor']
+  },
+  // 添加Worker支持
+  worker: {
+    format: 'es'
+  },
+  define: {
+    // 解决Monaco编辑器在Vite中的兼容性问题
+    global: 'globalThis'
   }
 });

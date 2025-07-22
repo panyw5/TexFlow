@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { RendererManager } from '../../services/rendering/renderer-manager';
 import { UserConfigManager } from '../../services/user-config-manager';
 import { RendererToggle } from './RendererToggle';
+import { PreambleEditor } from './PreambleEditor';
+import { PackageManager } from './PackageManager';
 import { IRenderer } from '../../services/rendering/IRenderer';
 
 interface PreviewProps {
@@ -27,6 +29,12 @@ export const Preview: React.FC<PreviewProps> = ({
   const [currentRenderer, setCurrentRenderer] = useState<'katex' | 'mathjax'>('katex');
   const [renderedHtml, setRenderedHtml] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isPreambleEditorVisible, setIsPreambleEditorVisible] = useState(false);
+  const [currentPreamble, setCurrentPreamble] = useState('');
+  const [isPackageManagerVisible, setIsPackageManagerVisible] = useState(false);
+  const [enabledPackages, setEnabledPackages] = useState<string[]>([]);
+  const [availablePackages, setAvailablePackages] = useState<string[]>([]);
+  const [configVersion, setConfigVersion] = useState(0); // Force re-render when config changes
 
   useEffect(() => {
     // Initialize managers and load config
@@ -35,6 +43,9 @@ export const Preview: React.FC<PreviewProps> = ({
       const manager = new RendererManager(config);
       setRendererManager(manager);
       setCurrentRenderer(config.defaultRenderer);
+      setCurrentPreamble(config.mathjaxPreamble);
+      setEnabledPackages(config.enabledPackages);
+      setAvailablePackages(configManager.getAvailablePackages());
     };
     initialize();
   }, []);
@@ -42,7 +53,7 @@ export const Preview: React.FC<PreviewProps> = ({
   const activeRenderer: IRenderer | null = useMemo(() => {
     if (!rendererManager) return null;
     return rendererManager.getRenderer(currentRenderer);
-  }, [rendererManager, currentRenderer]);
+  }, [rendererManager, currentRenderer, configVersion]); // Add configVersion dependency
 
   useEffect(() => {
     if (!activeRenderer || !latex) {
@@ -71,11 +82,61 @@ export const Preview: React.FC<PreviewProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [latex, activeRenderer]);
+  }, [latex, activeRenderer, configVersion]); // Add configVersion to force re-render
 
   const handleToggleRenderer = () => {
     const newRenderer = currentRenderer === 'katex' ? 'mathjax' : 'katex';
     setCurrentRenderer(newRenderer);
+  };
+
+  const handleEditPreamble = () => {
+    setIsPreambleEditorVisible(true);
+  };
+
+  const handleSavePreamble = async (newPreamble: string) => {
+    try {
+      await configManager.updateMathJaxPreamble(newPreamble);
+      setCurrentPreamble(newPreamble);
+      
+      // Recreate renderer manager with new config to ensure changes take effect
+      const config = await configManager.loadConfig();
+      const newRendererManager = new RendererManager(config);
+      setRendererManager(newRendererManager);
+      
+      setIsPreambleEditorVisible(false);
+      setConfigVersion(prev => prev + 1); // Force re-render
+    } catch (error) {
+      console.error('Failed to save preamble:', error);
+    }
+  };
+
+  const handleCancelPreambleEdit = () => {
+    setIsPreambleEditorVisible(false);
+  };
+
+  const handleManagePackages = () => {
+    setIsPackageManagerVisible(true);
+  };
+
+  const handlePackagesChange = async (newPackages: string[]) => {
+    try {
+      await configManager.updateEnabledPackages(newPackages);
+      setEnabledPackages(newPackages);
+      
+      // Recreate renderer manager with new config to ensure changes take effect
+      const config = await configManager.loadConfig();
+      const newRendererManager = new RendererManager(config);
+      setRendererManager(newRendererManager);
+      
+      setIsPackageManagerVisible(false);
+      setConfigVersion(prev => prev + 1); // Force re-render
+    } catch (error) {
+      console.error('Failed to update packages:', error);
+    }
+  };
+
+  const handleCancelPackageManager = () => {
+    setIsPackageManagerVisible(false);
   };
 
   return (
@@ -121,6 +182,73 @@ export const Preview: React.FC<PreviewProps> = ({
         alignItems: 'center',
         gap: '8px'
       }}>
+        {/* Preamble Edit Button - only show when MathJax is selected */}
+        {currentRenderer === 'mathjax' && !isPreambleEditorVisible && !isPackageManagerVisible && (
+          <>
+            <button
+              onClick={handleManagePackages}
+              style={{
+                backgroundColor: '#3a3a3a',
+                color: 'white',
+                padding: '8px',
+                borderRadius: '6px',
+                border: '1px solid rgba(85, 85, 85, 0.5)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#4a4a4a';
+                e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#3a3a3a';
+                e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
+              }}
+              title="Manage MathJax Packages"
+            >
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </button>
+            
+            <button
+              onClick={handleEditPreamble}
+              style={{
+                backgroundColor: '#3a3a3a',
+                color: 'white',
+                padding: '8px',
+                borderRadius: '6px',
+                border: '1px solid rgba(85, 85, 85, 0.5)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#4a4a4a';
+                e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#3a3a3a';
+                e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
+              }}
+              title="Edit MathJax Macros"
+            >
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
+            </button>
+          </>
+        )}
+        
         {/* Renderer Toggle Button */}
         <RendererToggle currentRenderer={currentRenderer} onToggle={handleToggleRenderer} />
         
@@ -215,6 +343,23 @@ export const Preview: React.FC<PreviewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Preamble Editor Overlay */}
+      <PreambleEditor
+        initialPreamble={currentPreamble}
+        onSave={handleSavePreamble}
+        onCancel={handleCancelPreambleEdit}
+        isVisible={isPreambleEditorVisible}
+      />
+
+      {/* Package Manager Overlay */}
+      <PackageManager
+        availablePackages={availablePackages}
+        enabledPackages={enabledPackages}
+        onPackagesChange={handlePackagesChange}
+        onClose={handleCancelPackageManager}
+        isVisible={isPackageManagerVisible}
+      />
     </div>
   );
 };

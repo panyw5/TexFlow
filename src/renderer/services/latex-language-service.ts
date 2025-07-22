@@ -168,7 +168,7 @@ class LaTeXCompletionProvider implements monaco.languages.CompletionItemProvider
     });
 
     // Check if we're after a backslash
-    const backslashMatch = beforeCursor.match(/\\([a-zA-Z]*)$/);
+    const backslashMatch = beforeCursor.match(/\\([a-zA-Z\\]*)$/);
 
     let word: string;
     let range: monaco.IRange;
@@ -326,8 +326,8 @@ class LaTeXCompletionProvider implements monaco.languages.CompletionItemProvider
 
       // Filter by context
       if (mathContext.isInMath) {
-        // In math mode, prioritize math-related commands
-        return ['math-symbols', 'math-operators', 'math-functions', 'greek-letters', 'arrows', 'delimiters'].includes(cmd.category);
+        // In math mode, prioritize math-related commands and allow formatting commands like \\
+        return ['math-symbols', 'math-operators', 'math-functions', 'greek-letters', 'arrows', 'delimiters', 'formatting'].includes(cmd.category);
       } else {
         // Outside math mode, show all commands
         return true;

@@ -35,6 +35,25 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
   useEffect(() => {
     if (!editorRef.current) return;
 
+    // Configure Monaco worker before creating editor
+    (window as any).MonacoEnvironment = {
+      getWorkerUrl: function (moduleId: string, label: string) {
+        if (label === 'json') {
+          return '/monaco-editor/esm/vs/language/json/json.worker.js';
+        }
+        if (label === 'css' || label === 'scss' || label === 'less') {
+          return '/monaco-editor/esm/vs/language/css/css.worker.js';
+        }
+        if (label === 'html' || label === 'handlebars' || label === 'razor') {
+          return '/monaco-editor/esm/vs/language/html/html.worker.js';
+        }
+        if (label === 'typescript' || label === 'javascript') {
+          return '/monaco-editor/esm/vs/language/typescript/ts.worker.js';
+        }
+        return '/monaco-editor/esm/vs/editor/editor.worker.js';
+      }
+    };
+
     // Register LaTeX language service
     LaTeXLanguageService.register();
 
@@ -69,8 +88,8 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
         shareSuggestSelections: false,
         showIcons: true,
         insertMode: 'replace',
-        // 强制启用建议
-        showWords: true,
+        // 强制启用建议，但禁用单词建议以避免显示之前输入的内容
+        showWords: false,
         showColors: false,
         showFields: true,
         showConstants: true,

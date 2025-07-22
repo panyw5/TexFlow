@@ -30,6 +30,10 @@ export const IPC_CHANNELS = {
   // Clipboard operations
   CLIPBOARD_WRITE_TEXT: 'clipboard:write-text',
   CLIPBOARD_READ_TEXT: 'clipboard:read-text',
+  
+  // Config operations
+  CONFIG_SAVE: 'config:save',
+  CONFIG_LOAD: 'config:load',
 } as const;
 
 // Type definitions for IPC messages

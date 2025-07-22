@@ -214,6 +214,12 @@ export class LaTeXLanguageService {
 
         console.log('Text until position:', JSON.stringify(textUntilPosition));
 
+        // 检查是否以 \\ 结尾（完整的换行命令），显示无建议
+        if (textUntilPosition.endsWith('\\\\')) {
+          console.log('Complete \\\\\\\\ command detected, showing no suggestions');
+          return { suggestions: [] };
+        }
+
         // 匹配反斜杠开头的命令
         const commandMatch = textUntilPosition.match(/\\(\w*)$/);
         if (commandMatch) {
@@ -275,7 +281,31 @@ export class LaTeXLanguageService {
     console.log('LaTeX completion provider registered');
     console.log('Available commands:', LATEX_COMMANDS.length);
 
-    this.isRegistered = true;
+    // Register a high-priority completion provider to suppress suggestions for 
+languages.registerCompletionItemProvider('latex', {
+  triggerCharacters: [''],
+  provideCompletionItems: (model, position, context) => {
+    const textUntilPosition = model.getValueInRange({
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    });
+
+    // 如果以 \ 结尾，提供一个空的高优先级建议来覆盖其他提供者
+    if (textUntilPosition.endsWith('')) {
+      return {
+        suggestions: [],
+        incomplete: false
+      };
+    }
+
+    // 否则不提供任何建议，让其他提供者处理
+    return null;
+  }
+});
+
+this.isRegistered = true;
     console.log('LaTeX language service registration complete');
 
     // Define custom LaTeX themes for better syntax highlighting

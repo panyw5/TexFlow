@@ -12,6 +12,12 @@ export class RendererManager {
     this.mathjaxRenderer = new MathJaxRenderer(config);
   }
 
+  updateConfig(config: UserConfig): void {
+    // Create a new MathJax renderer instance to ensure all config changes take effect
+    this.mathjaxRenderer = new MathJaxRenderer(config);
+    console.log('RendererManager: Created new MathJax renderer with updated config');
+  }
+
   getRenderer(engine: 'katex' | 'mathjax'): IRenderer {
     if (engine === 'mathjax') {
       return this.mathjaxRenderer;

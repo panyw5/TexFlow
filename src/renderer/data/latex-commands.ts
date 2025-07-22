@@ -616,7 +616,7 @@ export const LATEX_COMMANDS: LaTeXCommand[] = [
     kind: monaco.languages.CompletionItemKind.Snippet,
   },
 
-  // Formatting
+    // Formatting commands
   {
     command: 'text',
     description: 'Text in math mode',

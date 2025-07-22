@@ -16,6 +16,8 @@ const CHANNELS = {
   APP_QUIT: 'app:quit',
   CLIPBOARD_WRITE_TEXT: 'clipboard:write-text',
   CLIPBOARD_READ_TEXT: 'clipboard:read-text',
+  CONFIG_SAVE: 'config:save',
+  CONFIG_LOAD: 'config:load',
 };
 
 const MENU_CHANNELS = [
@@ -55,6 +57,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   readFromClipboard: () => 
     ipcRenderer.invoke(CHANNELS.CLIPBOARD_READ_TEXT),
 
+  // 配置操作
+  saveConfig: (config: any) => 
+    ipcRenderer.invoke(CHANNELS.CONFIG_SAVE, config),
+  loadConfig: () => 
+    ipcRenderer.invoke(CHANNELS.CONFIG_LOAD),
+
   // 菜单事件监听
   onMenuAction: (callback: (action: string) => void) => {
     MENU_CHANNELS.forEach(channel => {
@@ -85,6 +93,8 @@ declare global {
       quitApp: () => Promise<void>;
       writeToClipboard: (text: string) => Promise<void>;
       readFromClipboard: () => Promise<string>;
+      saveConfig: (config: any) => Promise<any>;
+      loadConfig: () => Promise<any>;
       onMenuAction: (callback: (action: string) => void) => void;
       removeMenuListeners: () => void;
     };

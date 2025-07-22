@@ -208,4 +208,55 @@ export function setupIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.CLIPBOARD_READ_TEXT, () => {
     return clipboard.readText();
   });
+
+  // Config operations
+  ipcMain.handle(IPC_CHANNELS.CONFIG_SAVE, async (_, config: any) => {
+    try {
+      const fs = require('fs').promises;
+      const path = require('path');
+      const os = require('os');
+      
+      // Save config to user data directory
+      const configDir = path.join(os.homedir(), '.texflow');
+      const configPath = path.join(configDir, 'config.json');
+      
+      // Ensure directory exists
+      await fs.mkdir(configDir, { recursive: true });
+      
+      // Save config
+      await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to save config:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.CONFIG_LOAD, async () => {
+    try {
+      const fs = require('fs').promises;
+      const path = require('path');
+      const os = require('os');
+      
+      const configPath = path.join(os.homedir(), '.texflow', 'config.json');
+      
+      // Check if config file exists
+      try {
+        await fs.access(configPath);
+      } catch {
+        // Return default config if file doesn't exist
+        return { success: true, config: null };
+      }
+      
+      // Load config
+      const configData = await fs.readFile(configPath, 'utf8');
+      const config = JSON.parse(configData);
+      
+      return { success: true, config };
+    } catch (error) {
+      console.error('Failed to load config:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  });
 }

@@ -8,23 +8,46 @@ import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html.js';
 import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages.js';
 
 export class MathJaxRenderer implements IRenderer {
-  constructor(config: UserConfig) {}
+  private config: UserConfig;
+
+  constructor(config: UserConfig) {
+    this.config = config;
+  }
+
+  updateConfig(config: UserConfig): void {
+    this.config = config;
+    console.log('MathJax renderer config updated:', config);
+  }
 
   async render(latex: string): Promise<string> {
     try {
-      // Create a completely new MathJax environment for each render call
-      // to avoid any stateful issues.
       const adaptor = liteAdaptor();
       RegisterHTMLHandler(adaptor);
 
-      const tex = new TeX({ packages: AllPackages });
+      // Get the user's preamble (macro definitions)
+      const preamble = this.config.mathjaxPreamble || '';
+
+      // Combine the preamble with the LaTeX content.
+      // MathJax will process the \newcommand definitions in the preamble.
+      const processedLatex = `${preamble}\n${latex}`;
+
+      // Configure enabled packages.
+      const packagesToUse = this.config.enabledPackages.length > 0
+        ? ['base', 'ams', 'newcommand', ...this.config.enabledPackages]
+        : AllPackages;
+
+      console.log('Loading packages:', packagesToUse);
+
+      // Create a new MathJax document each time to ensure package changes take effect
+      // This fixes the issue where package changes don't apply immediately
+      const tex = new TeX({ packages: packagesToUse });
       const svg = new SVG({ fontCache: 'none' });
       const mathjaxDoc = mathjax.document('', {
         InputJax: tex,
         OutputJax: svg,
       });
 
-      const node = mathjaxDoc.convert(latex, { display: true });
+      const node = mathjaxDoc.convert(processedLatex, { display: true });
       const formulaSvg = adaptor.innerHTML(node as any);
 
       const sheet = svg.styleSheet(mathjaxDoc);
@@ -44,7 +67,22 @@ export class MathJaxRenderer implements IRenderer {
       return finalHtml;
     } catch (error: any) {
       console.error('MathJax Rendering Error:', error);
-      return `<div style="color: red; font-family: sans-serif;">MathJax Error: ${error.message}</div>`;
+      console.error('Error stack:', error.stack);
+      
+      // Provide more specific error messages
+      let errorMessage = error.message;
+      if (error.message.includes('package')) {
+        errorMessage = `Package loading error: ${error.message}. Check if the package is enabled in package manager.`;
+      } else if (error.message.includes('Undefined control sequence')) {
+        errorMessage = `Undefined command: ${error.message}. Check if the required package is enabled or if the macro is defined.`;
+      }
+      
+      return `<div style="color: red; font-family: sans-serif; padding: 10px; background: rgba(255,0,0,0.1); border-radius: 4px;">
+        <strong>MathJax Error:</strong><br>
+        ${errorMessage}
+      </div>`;
     }
   }
+
+  // The parsePreamble function is no longer needed with this simplified approach.
 }

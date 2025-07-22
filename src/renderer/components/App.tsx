@@ -3,7 +3,6 @@ import { LaTeXEditor } from './Editor/LaTeXEditor';
 import { Preview } from './Preview/Preview';
 import { ResizableSplitPane } from './Layout/ResizableSplitPane';
 import { ThemeManager } from '../utils/theme-manager';
-import { ImageExportService, findMathElement } from '../services/image-export';
 
 interface AppState {
   content: string;
@@ -102,10 +101,7 @@ const App: React.FC = () => {
 
   const [isPinned, setIsPinned] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [showOutputDropdown, setShowOutputDropdown] = useState(false);
-  const [exportStatus, setExportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const editorRef = useRef<any>(null);
-  const outputDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleTogglePin = useCallback(async () => {
     try {
@@ -120,82 +116,6 @@ const App: React.FC = () => {
       console.error('Failed to toggle pin:', error);
     }
   }, []);
-
-  const handleOutput = useCallback(() => {
-    setShowOutputDropdown(prev => !prev);
-  }, []);
-
-  const handleOutputFormat = useCallback(async (format: 'png' | 'jpg') => {
-    try {
-      // 使用新的轻量级导出服务
-      const mathElement = findMathElement();
-      
-      if (!mathElement) {
-        console.warn('No math content found to export');
-        setExportStatus('error');
-        setTimeout(() => setExportStatus('idle'), 1500);
-        return;
-      }
-
-      const { dataUrl, filename } = await ImageExportService.exportToFile(
-        mathElement, 
-        format
-      );
-
-      if ((window as any).electronAPI) {
-        const response = await fetch(dataUrl);
-        const buffer = await response.arrayBuffer();
-        const uint8Array = new Uint8Array(buffer);
-        const base64String = btoa(String.fromCharCode(...uint8Array));
-        const result = await (window as any).electronAPI.saveBinaryFile(
-          base64String, 
-          filename
-        );
-        
-        if (result.success) {
-          setExportStatus('success');
-          setTimeout(() => setExportStatus('idle'), 1500);
-        } else {
-          setExportStatus('error');
-          setTimeout(() => setExportStatus('idle'), 1500);
-        }
-      } else {
-        // 浏览器环境下载
-        const link = document.createElement('a');
-        link.download = filename;
-        link.href = dataUrl;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setExportStatus('success');
-        setTimeout(() => setExportStatus('idle'), 1500);
-      }
-
-    } catch (error) {
-      console.error(`Failed to export as ${format}:`, error);
-      setExportStatus('error');
-      setTimeout(() => setExportStatus('idle'), 1500);
-    } finally {
-      setShowOutputDropdown(false);
-    }
-  }, []);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (outputDropdownRef.current && !outputDropdownRef.current.contains(event.target as Node)) {
-        setShowOutputDropdown(false);
-      }
-    };
-
-    if (showOutputDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showOutputDropdown]);
 
   // Test version with explicit inline styles to override any CSS conflicts
   return (
@@ -349,11 +269,6 @@ const App: React.FC = () => {
           />
           <Preview 
             latex={state.content}
-            onExport={handleOutputFormat}
-            exportStatus={exportStatus}
-            showOutputDropdown={showOutputDropdown}
-            onToggleOutputDropdown={handleOutput}
-            outputDropdownRef={outputDropdownRef}
           />
         </ResizableSplitPane>
       </div>

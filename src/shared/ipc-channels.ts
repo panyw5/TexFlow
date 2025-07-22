@@ -6,6 +6,7 @@ export const IPC_CHANNELS = {
   FILE_SAVE: 'file:save',
   FILE_SAVE_AS: 'file:save-as',
   FILE_SAVE_BINARY: 'file:save-binary',
+  FILE_EXPORT: 'file:export', // New export-specific channel
   FILE_NEW: 'file:new',
   
   // Window operations
@@ -69,4 +70,17 @@ export interface LaTeXRenderResult {
   success: boolean;
   html?: string;
   error?: string;
+}
+
+export interface FileExportResult {
+  success: boolean;
+  filePath?: string;
+  error?: string;
+}
+
+export interface FileExportData {
+  filename: string;
+  data: string; // Can be base64 for binary or plain text for text files
+  format: 'svg' | 'png' | 'jpg' | 'pdf';
+  encoding: 'utf8' | 'base64';
 }

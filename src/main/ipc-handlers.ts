@@ -5,7 +5,9 @@ import { application } from './main';
 import { 
   IPC_CHANNELS, 
   FileOpenResult, 
-  FileSaveResult 
+  FileSaveResult,
+  FileExportData,
+  FileExportResult
 } from '../shared/ipc-channels';
 
 export function setupIpcHandlers(): void {
@@ -147,6 +149,81 @@ export function setupIpcHandlers(): void {
         // Convert base64 to buffer and save
         const buffer = Buffer.from(data, 'base64');
         await fs.writeFile(result.filePath, buffer);
+
+        return {
+          success: true,
+          filePath: result.filePath,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
+    }
+  );
+
+  // File export handler
+  ipcMain.handle(
+    IPC_CHANNELS.FILE_EXPORT,
+    async (event, data: FileExportData): Promise<FileExportResult> => {
+      try {
+        const { dialog } = await import('electron');
+        const mainWindow = application.getMainWindow();
+        
+        if (!mainWindow) {
+          return {
+            success: false,
+            error: 'No main window available',
+          };
+        }
+
+        // Get file extension from filename
+        const extension = data.filename.split('.').pop()?.toLowerCase() || '';
+        
+        // Define file filters based on extension
+        const filters: { name: string; extensions: string[] }[] = [];
+        switch (extension) {
+          case 'svg':
+            filters.push({ name: 'SVG Files', extensions: ['svg'] });
+            break;
+          case 'png':
+            filters.push({ name: 'PNG Images', extensions: ['png'] });
+            break;
+          case 'jpg':
+          case 'jpeg':
+            filters.push({ name: 'JPEG Images', extensions: ['jpg', 'jpeg'] });
+            break;
+          case 'pdf':
+            filters.push({ name: 'PDF Files', extensions: ['pdf'] });
+            break;
+          default:
+            filters.push({ name: 'All Files', extensions: ['*'] });
+        }
+
+        const result = await dialog.showSaveDialog(mainWindow, {
+          defaultPath: data.filename,
+          filters,
+        });
+
+        if (result.canceled || !result.filePath) {
+          return {
+            success: false,
+            error: 'Save dialog was canceled',
+          };
+        }
+
+        // Write file based on data type
+        const fs = await import('fs/promises');
+        
+        if (data.encoding === 'base64') {
+          // Decode base64 and write as binary
+          const buffer = Buffer.from(data.data, 'base64');
+          await fs.writeFile(result.filePath, buffer);
+        } else {
+          // Write as text (for SVG)
+          await fs.writeFile(result.filePath, data.data, 'utf8');
+        }
 
         return {
           success: true,

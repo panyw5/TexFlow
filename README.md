@@ -1,5 +1,9 @@
 # TexFlow (beta; vibe code product)
 
+<div align="center">
+<img src="img/logo.png" width="100px" alt="TexFlow Logo">
+</div>
+
 > A modern, lightweight LaTeX equation editor with real-time preview and intelligent autocomplete
 
 ![TexFlow Interface](img/image.png)

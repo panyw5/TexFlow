@@ -1,9 +1,6 @@
 // 优化的 KaTeX 配置 - 减少字体文件大小
 import katex from 'katex';
 
-// 使用自定义的最小化 CSS 而不是完整的 KaTeX CSS
-import '../styles/katex-minimal.css';
-
 // 自定义 KaTeX 配置，优化性能
 export const optimizedKaTeXConfig = {
   throwOnError: false,

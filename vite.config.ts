@@ -49,9 +49,13 @@ export default defineConfig({
     port: 3000,
     host: 'localhost',
     strictPort: true,
-    // 添加Monaco编辑器Worker支持
+    // 添加字体文件访问支持
     fs: {
-      allow: ['..', '../node_modules/monaco-editor']
+      allow: [
+        '..',
+        '../../node_modules/monaco-editor',
+        '../../node_modules/katex'
+      ]
     }
   },
   optimizeDeps: {

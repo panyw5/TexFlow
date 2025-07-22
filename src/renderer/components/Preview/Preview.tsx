@@ -76,7 +76,6 @@ export const Preview: React.FC<PreviewProps> = ({
   const handleToggleRenderer = () => {
     const newRenderer = currentRenderer === 'katex' ? 'mathjax' : 'katex';
     setCurrentRenderer(newRenderer);
-    // Note: In a full app, this preference change should be saved via UserConfigManager
   };
 
   return (
@@ -84,9 +83,6 @@ export const Preview: React.FC<PreviewProps> = ({
       className="preview-panel"
       style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}
     >
-      <div className="preview-toolbar">
-        {/* Moved toolbar content to avoid collision */}
-      </div>
       <div
         className="preview-content"
         style={{

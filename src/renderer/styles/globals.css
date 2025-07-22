@@ -309,3 +309,49 @@ div[style*="text-align: center"] .katex {
 .title-bar textarea {
   -webkit-app-region: no-drag;
 }
+
+/* LaTeX Renderer Unification Styles */
+/* Ensure KaTeX and MathJax output have consistent positioning and sizing */
+.preview-content .katex-display,
+.preview-content .MathJax {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+/* KaTeX specific adjustments */
+.preview-content .katex {
+  font-size: inherit !important;
+  margin: 0 !important;
+}
+
+.preview-content .katex-display {
+  text-align: center !important;
+}
+
+/* MathJax SVG specific adjustments */
+.preview-content svg[data-mml-node="math"] {
+  display: block !important;
+  margin: 0 auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  vertical-align: middle !important;
+}
+
+/* MathJax container adjustments */
+.preview-content mjx-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure both engines scale consistently */
+.preview-content .katex,
+.preview-content mjx-container {
+  font-size: 1.15em !important;
+}

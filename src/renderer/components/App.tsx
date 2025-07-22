@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { LaTeXEditor } from './Editor/LaTeXEditor';
-import { LaTeXPreview } from './Preview/LaTeXPreview';
+import { Preview } from './Preview/Preview';
 import { ResizableSplitPane } from './Layout/ResizableSplitPane';
 import { ThemeManager } from '../utils/theme-manager';
 import { ImageExportService, findMathElement } from '../services/image-export';
@@ -347,9 +347,8 @@ const App: React.FC = () => {
             onCopyToClipboard={handleCopyToClipboard}
             isCopied={isCopied}
           />
-          <LaTeXPreview
-            content={state.content}
-            theme={state.theme}
+          <Preview 
+            latex={state.content}
             onExport={handleOutputFormat}
             exportStatus={exportStatus}
             showOutputDropdown={showOutputDropdown}

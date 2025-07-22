@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface PackageManagerProps {
   availablePackages: string[];
@@ -16,10 +16,17 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
   isVisible
 }) => {
   const [selectedPackages, setSelectedPackages] = useState<string[]>(enabledPackages);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setSelectedPackages(enabledPackages);
   }, [enabledPackages]);
+
+  useEffect(() => {
+    if (isVisible && containerRef.current) {
+      containerRef.current.focus();
+    }
+  }, [isVisible]);
 
   const handlePackageToggle = (packageName: string) => {
     if (selectedPackages.includes(packageName)) {
@@ -38,6 +45,12 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
   const handleCancel = () => {
     setSelectedPackages(enabledPackages); // Reset to original
     onClose();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      handleCancel();
+    }
   };
 
   if (!isVisible) return null;
@@ -62,6 +75,7 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
 
   return (
     <div
+      ref={containerRef}
       style={{
         position: 'absolute',
         top: 0,
@@ -74,7 +88,10 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
         display: 'flex',
         flexDirection: 'column',
         zIndex: 1000,
+        outline: 'none',
       }}
+      onKeyDown={handleKeyDown}
+      tabIndex={-1}
     >
       {/* Header */}
       <div
@@ -82,7 +99,7 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
           padding: '16px',
           borderBottom: '1px solid #333',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-start',
           alignItems: 'center',
         }}
       >
@@ -91,31 +108,9 @@ export const PackageManager: React.FC<PackageManagerProps> = ({
             Manage MathJax Packages
           </h3>
           <p style={{ margin: '4px 0 0 0', color: '#888', fontSize: '12px' }}>
-            Enable or disable packages for MathJax rendering
+            Enable or disable packages for MathJax rendering • Press Esc to cancel
           </p>
         </div>
-        <button
-          onClick={handleCancel}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#666',
-            cursor: 'pointer',
-            fontSize: '18px',
-            padding: '4px',
-            borderRadius: '4px',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#333';
-            e.currentTarget.style.color = 'white';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = '#666';
-          }}
-        >
-          ×
-        </button>
       </div>
 
       {/* Package List */}

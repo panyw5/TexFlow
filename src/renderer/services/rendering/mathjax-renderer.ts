@@ -31,8 +31,10 @@ export class MathJaxRenderer implements IRenderer {
       const styles = adaptor.innerHTML(sheet as any);
 
       const finalHtml = `
-        <style>${styles}</style>
-        ${formulaSvg}
+        <div class="mathjax-wrapper" style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 0; padding: 0;">
+          <style>${styles}</style>
+          ${formulaSvg}
+        </div>
       `;
 
       if (!formulaSvg) {

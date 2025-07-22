@@ -30,8 +30,14 @@ export class KaTeXRenderer implements IRenderer {
         const html = katex.renderToString(latex, {
           throwOnError: false,
           displayMode: true,
+          // 添加统一的包装器类
+          trust: true,
+          strict: false
         });
-        resolve(html);
+        
+        // 包装在统一的容器中以确保一致的定位
+        const wrappedHtml = `<div class="katex-wrapper" style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 0; padding: 0;">${html}</div>`;
+        resolve(wrappedHtml);
       } catch (error) {
         reject(error);
       }

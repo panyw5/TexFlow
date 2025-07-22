@@ -347,7 +347,14 @@ const App: React.FC = () => {
             onCopyToClipboard={handleCopyToClipboard}
             isCopied={isCopied}
           />
-          <Preview latex={state.content} />
+          <Preview 
+            latex={state.content}
+            onExport={handleOutputFormat}
+            exportStatus={exportStatus}
+            showOutputDropdown={showOutputDropdown}
+            onToggleOutputDropdown={handleOutput}
+            outputDropdownRef={outputDropdownRef}
+          />
         </ResizableSplitPane>
       </div>
     </div>

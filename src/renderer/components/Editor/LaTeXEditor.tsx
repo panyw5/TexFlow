@@ -138,6 +138,11 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
       console.log('Save shortcut triggered');
     });
 
+    // Add expand selection to next bracket command (Cmd+Shift+M)
+    monacoRef.current.addCommand(KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyM, () => {
+      expandSelectionToNextBracket();
+    });
+
     // Add listener for content changes to debug trigger issues
     monacoRef.current.onDidChangeModelContent((e: any) => {
       const model = monacoRef.current?.getModel();
@@ -266,6 +271,98 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
     }
     return '';
   }, []);
+
+  // Function to expand selection to next bracket
+  const expandSelectionToNextBracket = useCallback(() => {
+    if (!monacoRef.current) return;
+
+    const editor = monacoRef.current;
+    const model = editor.getModel();
+    if (!model) return;
+
+    const position = editor.getPosition();
+    if (!position) return;
+
+    const currentSelection = editor.getSelection();
+    if (!currentSelection) return;
+
+    // Define bracket pairs
+    const bracketPairs = [
+      { open: '{', close: '}' },
+      { open: '[', close: ']' },
+      { open: '(', close: ')' },
+      { open: '$', close: '$' },  // LaTeX inline math
+    ];
+
+    const text = model.getValue();
+    const startOffset = model.getOffsetAt(new Position(currentSelection.startLineNumber, currentSelection.startColumn));
+    const endOffset = model.getOffsetAt(new Position(currentSelection.endLineNumber, currentSelection.endColumn));
+
+    // Find all bracket pairs that contain the current selection
+    let allMatches: { start: number; end: number; type: string; size: number }[] = [];
+
+    for (const bracketPair of bracketPairs) {
+      // Find all bracket pairs of this type
+      const matches = findBracketPairs(text, bracketPair.open, bracketPair.close);
+      
+      for (const match of matches) {
+        // Check if this bracket pair contains the current selection
+        const contains = match.start < startOffset && match.end > endOffset;
+        
+        if (contains) {
+          allMatches.push({
+            start: match.start,
+            end: match.end,
+            type: bracketPair.open + bracketPair.close,
+            size: match.end - match.start
+          });
+        }
+      }
+    }
+
+    if (allMatches.length === 0) return;
+
+    // Sort by size (smallest first) to get the next level of expansion
+    allMatches.sort((a, b) => a.size - b.size);
+
+    // Find the smallest bracket pair that's larger than current selection
+    const currentSize = endOffset - startOffset;
+    const nextMatch = allMatches.find(match => match.size > currentSize);
+
+    if (nextMatch) {
+      const startPos = model.getPositionAt(nextMatch.start + 1); // Start after the opening bracket
+      const endPos = model.getPositionAt(nextMatch.end); // End before the closing bracket
+
+      const newSelection = new monaco.Selection(
+        startPos.lineNumber,
+        startPos.column,
+        endPos.lineNumber,
+        endPos.column
+      );
+
+      editor.setSelection(newSelection);
+      editor.focus();
+    }
+  }, []);
+
+  // Helper function to find bracket pairs in text
+  const findBracketPairs = (text: string, openChar: string, closeChar: string) => {
+    const pairs: { start: number; end: number }[] = [];
+    const stack: number[] = [];
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      
+      if (char === openChar) {
+        stack.push(i);
+      } else if (char === closeChar && stack.length > 0) {
+        const start = stack.pop()!;
+        pairs.push({ start, end: i });
+      }
+    }
+
+    return pairs;
+  };
 
   const replaceSelection = useCallback((text: string) => {
     if (monacoRef.current) {

@@ -117,7 +117,8 @@
     },
     "dmg": {
       "title": "TexFlow",
-      "icon": "img/logo.icns"
+      "icon": "img/logo.icns",
+      "background": null
     }
   },
   "repository": {

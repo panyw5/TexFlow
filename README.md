@@ -71,6 +71,7 @@ $$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$
 | `⌘⇧C`    | Copy LaTeX to clipboard                |
 | `⌘⇧D`    | Add section to next find match         |
 | `⌘⇧U`    | Remove section from current find match |
+| `⌘⇧M`    | Expand selection to next bracket       |
 | `⌘Z`     | Undo                                   |
 | `⌘Y`     | Redo                                   |
 

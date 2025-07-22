@@ -89,6 +89,15 @@ export function createMenu(): Menu {
             mainWindow?.webContents.send('menu:copy-latex');
           },
         },
+        { type: 'separator' },
+        {
+          label: 'Expand Selection to Next Bracket',
+          accelerator: SHORTCUTS.EXPAND_SELECTION_TO_BRACKET,
+          click: () => {
+            const mainWindow = application.getMainWindow();
+            mainWindow?.webContents.send('menu:expand-selection-to-bracket');
+          },
+        },
       ],
     },
 

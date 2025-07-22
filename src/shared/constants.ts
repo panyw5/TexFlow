@@ -41,4 +41,5 @@ export const SHORTCUTS = {
   OPEN_FILE: 'CmdOrCtrl+O',
   SAVE_FILE: 'CmdOrCtrl+S',
   SAVE_AS: 'CmdOrCtrl+Shift+S',
+  EXPAND_SELECTION_TO_BRACKET: 'CmdOrCtrl+Shift+M',
 };

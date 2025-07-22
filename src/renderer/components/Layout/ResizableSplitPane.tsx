@@ -125,15 +125,15 @@ export const ResizableSplitPane: React.FC<ResizableSplitPaneProps> = ({
         }}>
           {direction === 'horizontal' ? (
             <div style={{
-              width: '2px',
-              height: '16px',
+              width: '8px',
+              height: '60px',
               backgroundColor: 'currentColor',
               borderRadius: '1px'
             }} />
           ) : (
             <div style={{
-              width: '16px',
-              height: '2px',
+              width: '60px',
+              height: '8px',
               backgroundColor: 'currentColor',
               borderRadius: '1px'
             }} />

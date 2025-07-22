@@ -155,8 +155,8 @@ export const SplitPane: React.FC<SplitPaneProps> = ({
           <div className={`
             bg-gray-400 rounded
             ${direction === 'horizontal' 
-              ? 'w-8 h-0.5' 
-              : 'w-0.5 h-8'
+              ? 'w-20 h-2' 
+              : 'w-2 h-20'
             }
           `} />
         </div>

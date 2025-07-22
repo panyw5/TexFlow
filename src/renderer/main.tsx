@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './components/App';
 import TestApp from './components/TestApp';
 import './styles/globals.css';
+import 'katex/dist/katex.min.css'; // Import KaTeX styles
 
 // Ensure we have the root element
 const rootElement = document.getElementById('root');

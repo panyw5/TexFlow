@@ -14,7 +14,7 @@ TexFlow is a LaTeX equation editor designed for mathematicians, scientists, and 
 
 ### 🚀 Real-Time Preview
 - **MacOS and Windows** - cross-platform support
-- **Instant rendering** with KaTeX engine - see your equations come to life as you type
+- **Instant rendering** with KaTeX/MathJax dual engine - see your equations come to life as you type
 - **Synchronized editing** - changes appear immediately in the preview panel
 - **Error highlighting** - instant feedback on syntax errors with helpful suggestions
 
@@ -35,6 +35,8 @@ TexFlow is a LaTeX equation editor designed for mathematicians, scientists, and 
 - **Lightning-fast startup** - ready to use in seconds
 - **Pin to top** - keep TexFlow above other windows while working
 - **One-click copy** - instantly copy LaTeX code to clipboard
+- **One-click switch** - switch between KaTeX and MathJax rendering modes
+- **One-click export** - export to png or jpg
 - **Keyboard-first design** - comprehensive shortcuts for power users
 
 ## 🔧 Supported LaTeX

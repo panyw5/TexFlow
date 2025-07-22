@@ -6,9 +6,9 @@
 
 > A modern, lightweight LaTeX equation editor with real-time preview and intelligent autocomplete
 
-![TexFlow Interface](img/image-1.png)
+![TexFlow Interface](img/image-1.jpg)
 
-![TexFlow Interface](img/image-2.png)
+![TexFlow Interface](img/image-2.jpg)
 
 TexFlow is a LaTeX equation editor designed for mathematicians, scientists, and students who need to create beautiful mathematical expressions quickly and efficiently. Built with modern web technologies and powered by Monaco Editor and KaTeX, it delivers a seamless editing experience with instant visual feedback.
 

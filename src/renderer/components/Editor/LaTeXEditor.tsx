@@ -82,7 +82,7 @@ export const LaTeXEditor = React.forwardRef<any, LaTeXEditorProps>(({
         showSnippets: true,
         showFunctions: true,
         showVariables: true,
-        filterGraceful: true,
+        filterGraceful: false,
         snippetsPreventQuickSuggestions: false,
         localityBonus: true,
         shareSuggestSelections: false,

@@ -8,6 +8,12 @@ declare global {
       saveBinaryFile: (data: string, defaultName: string) => Promise<{ success: boolean; path?: string; error?: string }>;
       exportFile: (exportData: { filename: string; data: string; format: string; encoding: string }) => Promise<{ success: boolean; filePath?: string; error?: string }>;
       
+      // Drag & Drop operations
+      startDrag: (latex: string, format: string, options: any) => Promise<{ success: boolean; filePath?: string; error?: string }>;
+      prepareDragExport: (exportData: any) => Promise<{ success: boolean }>;
+      cleanupDragFiles: () => Promise<{ success: boolean }>;
+      onDragRequestExportData: (callback: (request: any) => void) => void;
+      
       // Window operations
       minimizeWindow: () => Promise<void>;
       maximizeWindow: () => Promise<void>;

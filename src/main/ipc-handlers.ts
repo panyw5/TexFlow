@@ -1,4 +1,4 @@
-import { ipcMain, dialog, clipboard, app } from 'electron';
+import { ipcMain, dialog, clipboard, app, nativeImage } from 'electron';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { application } from './main';

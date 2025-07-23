@@ -35,6 +35,12 @@ export const IPC_CHANNELS = {
   // Config operations
   CONFIG_SAVE: 'config:save',
   CONFIG_LOAD: 'config:load',
+  
+  // Drag & Drop operations
+  DRAG_START: 'drag:start',
+  DRAG_EXPORT_PREPARE: 'drag:export-prepare',
+  DRAG_CLEANUP: 'drag:cleanup',
+  SAVE_TO_DESKTOP: 'save:to-desktop',  // 新增：保存到桌面
 } as const;
 
 // Type definitions for IPC messages
@@ -83,4 +89,28 @@ export interface FileExportData {
   data: string; // Can be base64 for binary or plain text for text files
   format: 'svg' | 'png' | 'jpg' | 'pdf';
   encoding: 'utf8' | 'base64';
+}
+
+// Drag & Drop related types
+export interface DragStartRequest {
+  latex: string;
+  format: 'png' | 'svg' | 'jpg';
+  options: {
+    scale?: number;
+    backgroundColor?: string;
+    quality?: number;
+  };
+}
+
+export interface DragStartResponse {
+  success: boolean;
+  filePath?: string;
+  error?: string;
+}
+
+export interface DragExportData {
+  latex: string;
+  format: 'png' | 'svg' | 'jpg';
+  data: string; // base64 或 SVG 字符串
+  encoding: 'base64' | 'utf8';
 }

@@ -14,9 +14,9 @@ export default defineConfig({
     chunkSizeWarningLimit: 500,
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: false,  // 暂时保留console.log用于调试
         drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug']
+        // pure_funcs: ['console.log', 'console.info', 'console.debug']  // 注释掉这行
       }
     },
     rollupOptions: {

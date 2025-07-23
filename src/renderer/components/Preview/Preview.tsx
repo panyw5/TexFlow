@@ -5,6 +5,7 @@ import { RendererToggle } from './RendererToggle';
 import { PreambleEditor } from './PreambleEditor';
 import { PackageManager } from './PackageManager';
 import { ExportButton } from '../Export/ExportButton';
+import { DraggablePreview } from './DraggablePreview';
 import { IRenderer } from '../../services/rendering/IRenderer';
 
 interface PreviewProps {
@@ -135,33 +136,39 @@ export const Preview: React.FC<PreviewProps> = ({
       className="preview-panel"
       style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}
     >
-      <div
-        className="preview-content"
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          fontSize: '2em',
-          flex: 1,
-          overflow: 'auto',
-          paddingTop: '2em',
-        }}
+      <DraggablePreview
+        latex={latex}
+        renderedHtml={renderedHtml}
+        defaultDragFormat="png"
       >
         <div
+          className="preview-content"
           style={{
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '200px',
-            width: '100%',
-            // 统一样式来确保 KaTeX 和 MathJax 输出一致
-            fontSize: 'inherit',
-            lineHeight: '1.2',
-            textAlign: 'center'
+            alignItems: 'flex-start',
+            fontSize: '2em',
+            flex: 1,
+            overflow: 'auto',
+            paddingTop: '2em',
           }}
-          dangerouslySetInnerHTML={{ __html: renderedHtml }}
-        />
-      </div>
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: '200px',
+              width: '100%',
+              // 统一样式来确保 KaTeX 和 MathJax 输出一致
+              fontSize: 'inherit',
+              lineHeight: '1.2',
+              textAlign: 'center'
+            }}
+            dangerouslySetInnerHTML={{ __html: renderedHtml }}
+          />
+        </div>
+      </DraggablePreview>
       {error && <div className="preview-error">{error}</div>}
       
       {/* Bottom right controls */}

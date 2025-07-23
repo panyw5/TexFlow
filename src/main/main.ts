@@ -3,9 +3,11 @@ import * as path from 'path';
 import { isDev } from '../shared/constants';
 import { createMenu } from './menu';
 import { setupIpcHandlers } from './ipc-handlers';
+import { DragExportService } from './services/drag-export-service';
 
 class Application {
   private mainWindow: BrowserWindow | null = null;
+  private dragExportService: DragExportService | null = null;
 
   constructor() {
     this.setupApp();
@@ -17,6 +19,9 @@ class Application {
       this.createWindow();
       this.setupMenu();
       setupIpcHandlers();
+      
+      // 初始化拖拽导出服务
+      this.dragExportService = new DragExportService();
 
       app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
@@ -27,6 +32,11 @@ class Application {
 
     // Handle window closed
     app.on('window-all-closed', () => {
+      // 清理拖拽服务
+      if (this.dragExportService) {
+        this.dragExportService.cleanup();
+      }
+      
       if (process.platform !== 'darwin') {
         app.quit();
       }

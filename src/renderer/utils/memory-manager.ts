@@ -12,8 +12,8 @@ export class MemoryManager {
   // Monitor memory usage
   startMemoryMonitoring(): void {
     setInterval(() => {
-      if (performance.memory) {
-        const { usedJSHeapSize, totalJSHeapSize } = performance.memory;
+      if ((performance as any).memory) {
+        const { usedJSHeapSize, totalJSHeapSize } = (performance as any).memory;
         const usage = usedJSHeapSize / totalJSHeapSize;
         
         if (usage > 0.8) {

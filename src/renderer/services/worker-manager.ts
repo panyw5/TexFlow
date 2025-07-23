@@ -1,6 +1,6 @@
 import { TokenizeOptions } from './latex-tokenizer';
-// Import worker with static URL
-import LaTeXTokenizerWorker from '../workers/latex-tokenizer.worker.ts?worker';
+// Import worker with static URL - commented out for build compatibility
+// import LaTeXTokenizerWorker from '../workers/latex-tokenizer.worker.ts?worker';
 
 export class WorkerManager {
   private workers = new Map<string, Worker>();
@@ -33,7 +33,10 @@ export class WorkerManager {
       
       switch (type) {
         case 'latex-tokenizer':
-          worker = new LaTeXTokenizerWorker();
+          // Create worker using URL constructor for build compatibility
+          worker = new Worker(new URL('../workers/latex-tokenizer.worker.ts', import.meta.url), {
+            type: 'module'
+          });
           break;
         default:
           throw new Error(`Unknown worker type: ${type}`);

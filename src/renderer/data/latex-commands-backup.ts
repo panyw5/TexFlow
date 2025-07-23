@@ -308,6 +308,15 @@ export const LATEX_COMMANDS: LaTeXCommand[] = [
     kind: monaco.languages.CompletionItemKind.Snippet,
   },
   {
+    command: 'begin{align*}',
+    description: 'Aligned equations environment (no numbering)',
+    category: 'environments',
+    parameters: [],
+    example: '\\begin{align*}\n  x &= y \\\\\n  a &= b\n\\end{align*}',
+    insertText: '\\begin{align*}\n  ${1:equation} &= ${2:expression} \\\\\n  ${3:equation} &= ${4:expression}\n\\end{align*}',
+    kind: monaco.languages.CompletionItemKind.Snippet,
+  },
+  {
     command: 'begin{matrix}',
     description: 'Matrix environment',
     category: 'environments',

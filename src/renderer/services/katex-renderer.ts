@@ -24,15 +24,35 @@ export class KaTeXRenderer implements IRenderer {
     return latex;
   }
 
+  private preprocessLatex(latex: string): string {
+    // 移除公式编号：将 align 环境替换为 align* 环境
+    let processed = latex
+      .replace(/\\begin\{align\}/g, '\\begin{align*}')
+      .replace(/\\end\{align\}/g, '\\end{align*}')
+      .replace(/\\begin\{equation\}/g, '\\begin{equation*}')
+      .replace(/\\end\{equation\}/g, '\\end{equation*}')
+      .replace(/\\begin\{gather\}/g, '\\begin{gather*}')
+      .replace(/\\end\{gather\}/g, '\\end{gather*}')
+      .replace(/\\begin\{multline\}/g, '\\begin{multline*}')
+      .replace(/\\end\{multline\}/g, '\\end{multline*}');
+    
+    return processed;
+  }
+
   private async performRender(latex: string): Promise<string> {
     return new Promise((resolve, reject) => {
       try {
-        const html = katex.renderToString(latex, {
+        // 预处理 LaTeX 以移除公式编号
+        const processedLatex = this.preprocessLatex(latex);
+        
+        const html = katex.renderToString(processedLatex, {
           throwOnError: false,
           displayMode: true,
           // 添加统一的包装器类
           trust: true,
-          strict: false
+          strict: false,
+          // 禁用公式编号
+          leqno: false
         });
         
         // 包装在统一的容器中以确保一致的定位

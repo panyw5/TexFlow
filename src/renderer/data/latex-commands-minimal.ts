@@ -261,6 +261,13 @@ export const LATEX_COMMANDS: LaTeXCommand[] = [
     insertText: '\\begin{align}\n\t${1:equations}\n\\end{align}',
   },
   {
+    command: 'begin{align*}',
+    description: 'Align environment (no numbering)',
+    category: 'environments',
+    example: '\\begin{align*}\n  x &= y \\\\\n  a &= b\n\\end{align*}',
+    insertText: '\\begin{align*}\n\t${1:equations}\n\\end{align*}',
+  },
+  {
     command: 'begin{matrix}',
     description: 'Matrix environment',
     category: 'environments',

@@ -52,8 +52,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke(CHANNELS.FILE_EXPORT, exportData),
 
   // 拖拽导出
-  startDrag: (latex: string, format: string, options: any) => 
-    ipcRenderer.invoke(CHANNELS.DRAG_START, latex, format, options),
+  startDrag: (filePath: string) => 
+    ipcRenderer.send(CHANNELS.DRAG_START, filePath),
   prepareDragExport: (exportData: any) => 
     ipcRenderer.invoke(CHANNELS.DRAG_EXPORT_PREPARE, exportData),
   cleanupDragFiles: () => 
@@ -107,8 +107,8 @@ declare global {
       saveFileAs: (content: string) => Promise<any>;
       saveBinaryFile: (data: string, defaultName: string) => Promise<any>;
       exportFile: (exportData: { filename: string; data: string; format: string; encoding: string }) => Promise<any>;
-      // 拖拽导出
-      startDrag: (latex: string, format: string, options: any) => Promise<any>;
+            // Drag and drop operations
+      startDrag: (filePath: string) => void;
       prepareDragExport: (exportData: any) => Promise<any>;
       cleanupDragFiles: () => Promise<any>;
       onDragRequestExportData: (callback: (request: any) => void) => void;

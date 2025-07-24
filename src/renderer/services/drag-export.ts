@@ -119,21 +119,44 @@ export class DragExportManager {
   public async startDrag(latex: string, options: DragExportOptions): Promise<boolean> {
     console.log('[DragExportManager] startDrag 被调用:', { latex: latex.substring(0, 50) + '...', options });
     
-    if (!this.isElectron) {
-      console.error('[DragExportManager] 不在 Electron 环境中');
+    if (!this.exportService) {
+      console.error('[DragExportManager] Export service not initialized');
       return false;
     }
-    
+
     if (!window.electronAPI?.startDrag) {
       console.error('[DragExportManager] startDrag API 不可用');
       return false;
     }
 
     try {
-      console.log('[DragExportManager] 调用 electronAPI.startDrag...');
-      const result = await window.electronAPI.startDrag(latex, options.format, options);
-      console.log('[DragExportManager] startDrag 结果:', result);
-      return result.success;
+      // 步骤1: 先生成导出数据
+      console.log('[DragExportManager] 步骤1: 生成导出数据');
+      const exportData = await this.generateExportData(latex, options.format, options);
+      
+      if (!exportData) {
+        console.error('[DragExportManager] 导出数据生成失败');
+        return false;
+      }
+
+      // 步骤2: 预生成文件
+      console.log('[DragExportManager] 步骤2: 预生成文件');
+      const prepareResult = await window.electronAPI.prepareDragExport(exportData);
+      console.log('[DragExportManager] 预生成结果:', prepareResult);
+      console.log('[DragExportManager] 预生成结果详情:', JSON.stringify(prepareResult));
+
+      if (!prepareResult.success || !prepareResult.filePath) {
+        console.error('[DragExportManager] 文件预生成失败');
+        return false;
+      }
+
+      // 步骤3: 启动拖拽 (使用 send 而不是 invoke)
+      console.log('[DragExportManager] 步骤3: 启动拖拽, 文件:', prepareResult.filePath);
+      console.log('[DragExportManager] 文件路径类型:', typeof prepareResult.filePath);
+      console.log('[DragExportManager] 文件路径长度:', prepareResult.filePath.length);
+      window.electronAPI.startDrag(prepareResult.filePath);  // 直接发送文件路径
+      
+      return true;
     } catch (error) {
       console.error('[DragExportManager] startDrag 失败:', error);
       return false;

@@ -1,4 +1,7 @@
-declare global {
+declare gl      // Drag and drop operations
+      startDrag: (filePath: string) => void;
+      prepareDragExport: (exportData: any) => Promise<{ success: boolean; filePath?: string; error?: string }>;
+      cleanupDragFiles: () => Promise<{ success: boolean }>; {
   interface Window {
     electronAPI?: {
       // File operations

@@ -36,10 +36,10 @@ export class DragExportService {
   }
 
   private setupIPC() {
-    // 拖拽开始处理器
-    ipcMain.handle(IPC_CHANNELS.DRAG_START, this.handleDragStart.bind(this));
+    // 拖拽开始处理器 - 使用 on 而不是 handle (按照官方文档)
+    ipcMain.on(IPC_CHANNELS.DRAG_START, this.handleDragStart.bind(this));
     
-    // 准备拖拽文件 - 这个用于直接的 invoke/handle 通信
+    // 预生成拖拽文件
     ipcMain.handle(IPC_CHANNELS.DRAG_EXPORT_PREPARE, this.handleDragExportPrepare.bind(this));
     
     // 清理临时文件
@@ -50,129 +50,76 @@ export class DragExportService {
   }
 
   private async handleDragStart(
-    event: Electron.IpcMainInvokeEvent,
-    latex: string,
-    format: string,
-    options: any
-  ): Promise<DragStartResponse> {
+    event: Electron.IpcMainEvent,  // 改为 IpcMainEvent
+    ...args: any[]  // 临时使用 args 来调试参数
+  ): Promise<void> {
+    console.log('[DragExportService] handleDragStart 收到参数:', args);
+    const filePath = args[0];  // 第一个参数应该是文件路径
     try {
-      // 构建 request 对象
-      const request: DragStartRequest = {
-        latex,
-        format: format as 'png' | 'svg' | 'jpg',
-        options: options || {}
-      };
-      
-      console.log('[DragExportService] 开始拖拽流程:', request);
+      console.log('[DragExportService] 开始拖拽，文件路径:', filePath);
       
       const mainWindow = require('../main').application.getMainWindow();
       if (!mainWindow) {
         console.error('[DragExportService] 没有主窗口可用');
-        return { success: false, error: 'No main window available' };
+        return;
       }
 
-      // 生成临时文件名
-      const timestamp = Date.now();
-      const fileName = `formula-${timestamp}.${request.format}`;
-      const filePath = path.join(this.tempDir, fileName);
-
-      console.log('[DragExportService] 请求导出数据...');
-      
-      // 通知渲染进程生成导出数据，并等待响应
-      event.sender.send('drag:request-export-data', request);
-      
-      // 等待导出数据 - 使用 Promise 等待
-      const exportData = await this.waitForExportData();
-      
-      if (!exportData) {
-        console.error('[DragExportService] 导出数据生成失败');
-        return { success: false, error: 'Failed to generate export data' };
+      // 检查文件是否存在
+      try {
+        await fs.access(filePath);
+        console.log('[DragExportService] 文件存在，开始拖拽');
+      } catch (error) {
+        console.error('[DragExportService] 文件不存在:', filePath);
+        return;
       }
 
-      console.log('[DragExportService] 获得导出数据，大小:', exportData.data.length);
-
-      // 写入临时文件
-      await this.writeTempFile(filePath, exportData);
-      console.log('[DragExportService] 临时文件创建成功:', filePath);
-      
       // 记录活动文件
       this.activeDragFiles.add(filePath);
 
-      // 启动拖拽 - 使用生成的文件作为图标
-      console.log('[DragExportService] 启动原生拖拽');
-      
-      // 设置拖拽完成的监听
-      const dragEndHandler = () => {
-        console.log('[DragExportService] 拖拽操作完成');
-        // 延迟检查文件是否还存在
-        setTimeout(async () => {
-          try {
-            await fs.access(filePath);
-            console.log('[DragExportService] 文件仍存在，拖拽可能取消了');
-          } catch {
-            console.log('[DragExportService] 文件已被移动，拖拽成功！');
-          }
-        }, 1000);
-      };
-
-      // 监听窗口的拖拽结束事件
-      mainWindow.once('closed', dragEndHandler);
-      mainWindow.webContents.once('did-finish-load', dragEndHandler);
-      
+      // 启动拖拽 - 按照官方文档的简化方式
       try {
-        // 使用生成的PNG文件作为图标
         mainWindow.webContents.startDrag({
           file: filePath,
-          icon: filePath,  // 使用文件本身作为图标
+          icon: this.dragIconPath || filePath,  // 使用拖拽图标或文件本身
         });
         console.log('[DragExportService] 拖拽启动成功');
         
-        // 设置超时检查
-        setTimeout(dragEndHandler, 5000);
-        
       } catch (error) {
-        console.log('[DragExportService] 拖拽启动失败:', error);
-        throw error;
+        console.error('[DragExportService] 拖拽启动失败:', error);
+        this.activeDragFiles.delete(filePath);
       }
 
-      console.log('[DragExportService] 拖拽启动成功');
-      return { success: true, filePath };
     } catch (error) {
-      console.error('[DragExportService] 拖拽失败:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
-      };
+      console.error('[DragExportService] 拖拽处理失败:', error);
     }
-  }
-
-  private async waitForExportData(): Promise<DragExportData | null> {
-    return new Promise((resolve, reject) => {
-      this.exportDataPromise = { resolve, reject };
-      
-      // 设置超时
-      setTimeout(() => {
-        if (this.exportDataPromise) {
-          this.exportDataPromise.resolve(null);
-          this.exportDataPromise = null;
-        }
-      }, 10000);
-    });
   }
 
   private async handleDragExportPrepare(
     _: Electron.IpcMainInvokeEvent,
     data: DragExportData
-  ) {
-    console.log('[DragExportService] 收到导出数据:', data?.data?.length || 0, 'bytes');
-    
-    // 解决等待的 Promise
-    if (this.exportDataPromise) {
-      this.exportDataPromise.resolve(data);
-      this.exportDataPromise = null;
+  ): Promise<{ success: boolean; filePath?: string; error?: string }> {
+    try {
+      console.log('[DragExportService] 预生成文件，格式:', data.format);
+      
+      // 生成临时文件名
+      const timestamp = Date.now();
+      const fileName = `formula-${timestamp}.${data.format}`;
+      const filePath = path.join(this.tempDir, fileName);
+      
+      // 写入临时文件
+      await this.writeTempFile(filePath, data);
+      console.log('[DragExportService] 文件预生成成功:', filePath);
+      
+      const result = { success: true, filePath };
+      console.log('[DragExportService] 返回结果:', JSON.stringify(result));
+      return result;
+    } catch (error) {
+      console.error('[DragExportService] 文件预生成失败:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
     }
-    
-    return { success: true };
   }
 
   private async writeTempFile(filePath: string, exportData: DragExportData) {

@@ -68,7 +68,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke(CHANNELS.CONFIG_LOAD),
 
   // 拖放操作
-  startDrag: (dragData: { filename: string; content: string; filetype: string }) => 
+  startDrag: (dragData: { 
+    filename: string; 
+    content: string; 
+    filetype: 'tex' | 'pdf' | 'png' | 'jpg' | 'html' | 'svg';
+    renderType?: 'source' | 'rendered';
+    encoding?: 'base64' | 'utf8';
+  }) => 
     ipcRenderer.send(CHANNELS.DRAG_START, dragData),
 
   // 菜单事件监听
@@ -106,7 +112,13 @@ declare global {
       loadConfig: () => Promise<any>;
       onMenuAction: (callback: (action: string) => void) => void;
       removeMenuListeners: () => void;
-      startDrag: (dragData: { filename: string; content: string; filetype: string }) => void;
+      startDrag: (dragData: { 
+        filename: string; 
+        content: string; 
+        filetype: 'tex' | 'pdf' | 'png' | 'jpg' | 'html' | 'svg';
+        renderType?: 'source' | 'rendered';
+        encoding?: 'base64' | 'utf8';
+      }) => void;
     };
   }
 }

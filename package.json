@@ -1,6 +1,6 @@
 {
   "name": "texflow",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "A lightweight macOS application for editing and previewing LaTeX equations in real-time.",
   "main": "dist/main/main.js",
   "homepage": "https://github.com/panyw5/texflow#readme",
@@ -27,7 +27,6 @@
     "convert-icon:win": "bash scripts/convert-icon-windows.sh"
   },
   "dependencies": {
-    "canvas": "^3.1.2",
     "electron-store": "^8.1.0",
     "html2canvas": "^1.4.1",
     "katex": "^0.16.9",
@@ -72,6 +71,7 @@
     },
     "files": [
       "dist/**/*",
+      "img/**/*",
       "!node_modules/**/*",
       "node_modules/katex/dist/katex.min.js",
       "node_modules/katex/dist/katex.min.css",
@@ -85,11 +85,15 @@
       "!**/*.d.ts"
     ],
     "asarUnpack": [
-      "node_modules/katex/dist/fonts/*.woff2"
+      "node_modules/katex/dist/fonts/*.woff2",
+      "img/**/*"
     ],
     "mac": {
       "icon": "img/logo.icns",
       "category": "public.app-category.productivity",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null,
       "target": [
         {
           "target": "dmg",
@@ -113,8 +117,7 @@
         {
           "target": "nsis",
           "arch": [
-            "x64",
-            "ia32"
+            "x64"
           ]
         }
       ]

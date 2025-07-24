@@ -76,19 +76,65 @@ export function svgToCanvas(svg: string, options: ExportOptions = {}): Promise<H
     
     img.onload = () => {
       try {
-        // Calculate dimensions
+        // Calculate dimensions with proper fallbacks for SVG
         const scale = options.scale || 2;
         const padding = options.padding || 20;
         
-        // Use provided dimensions or calculate from image
-        const baseWidth = options.width || img.naturalWidth || img.width;
-        const baseHeight = options.height || img.naturalHeight || img.height;
+        // For SVG, we need to parse dimensions from the SVG itself or use defaults
+        let baseWidth = options.width;
+        let baseHeight = options.height;
         
+        console.log('=== SVG 到 Canvas 转换开始 ===');
+        console.log('输入选项:', options);
+        console.log('SVG 内容长度:', cleanSvg.length);
+        
+        if (!baseWidth || !baseHeight) {
+          // Try to extract dimensions from SVG viewBox or width/height attributes
+          const viewBoxMatch = cleanSvg.match(/viewBox="[^"]*\s+([0-9.]+)\s+([0-9.]+)"/);
+          const widthMatch = cleanSvg.match(/width="([0-9.]+)"/);
+          const heightMatch = cleanSvg.match(/height="([0-9.]+)"/);
+          
+          console.log('SVG 尺寸解析:', { viewBoxMatch, widthMatch, heightMatch });
+          
+          if (viewBoxMatch) {
+            baseWidth = baseWidth || parseFloat(viewBoxMatch[1]);
+            baseHeight = baseHeight || parseFloat(viewBoxMatch[2]);
+            console.log('使用 viewBox 尺寸:', baseWidth, 'x', baseHeight);
+          } else if (widthMatch && heightMatch) {
+            baseWidth = baseWidth || parseFloat(widthMatch[1]);
+            baseHeight = baseHeight || parseFloat(heightMatch[1]);
+            console.log('使用 width/height 属性:', baseWidth, 'x', baseHeight);
+          } else {
+            // Use image natural dimensions as fallback, or reasonable defaults
+            baseWidth = baseWidth || img.naturalWidth || img.width || 400;
+            baseHeight = baseHeight || img.naturalHeight || img.height || 200;
+            console.log('使用图片或默认尺寸:', baseWidth, 'x', baseHeight);
+          }
+          
+          // 只设置较小的最小高度，保持宽高比例避免形变
+          const minHeight = 100; // 设置最小高度为 100px
+          if (baseHeight < minHeight) {
+            const ratio = minHeight / baseHeight;
+            baseHeight = minHeight;
+            baseWidth = baseWidth * ratio; // 按比例调整宽度
+            console.log('应用最小高度，新尺寸:', baseWidth, 'x', baseHeight);
+          }
+        }
+        
+        console.log(`Canvas setup: base=${baseWidth}x${baseHeight}, scale=${scale}, padding=${padding}`);
+        
+        // Set canvas size with high resolution
         canvas.width = (baseWidth + padding * 2) * scale;
         canvas.height = (baseHeight + padding * 2) * scale;
         
+        console.log(`Canvas size: ${canvas.width}x${canvas.height}`);
+        
         // Set high DPI scaling
         ctx.scale(scale, scale);
+        
+        // Enable image smoothing for high quality
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         
         // Set background color if specified
         if (options.backgroundColor && options.backgroundColor !== 'transparent') {

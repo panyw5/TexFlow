@@ -5,17 +5,19 @@ import { RendererToggle } from './RendererToggle';
 import { PreambleEditor } from './PreambleEditor';
 import { PackageManager } from './PackageManager';
 import { ExportButton } from '../Export/ExportButton';
-import { DraggablePreview } from './DraggablePreview';
+import { DraggablePreview, AllExportFormat } from './DraggablePreview';
 import { IRenderer } from '../../services/rendering/IRenderer';
 
 interface PreviewProps {
   latex: string;
+  filePath?: string | null;
 }
 
 const configManager = new UserConfigManager();
 
 export const Preview: React.FC<PreviewProps> = ({ 
-  latex
+  latex,
+  filePath = null
 }) => {
   const [rendererManager, setRendererManager] = useState<RendererManager | null>(null);
   const [currentRenderer, setCurrentRenderer] = useState<'katex' | 'mathjax'>('katex');
@@ -27,6 +29,7 @@ export const Preview: React.FC<PreviewProps> = ({
   const [enabledPackages, setEnabledPackages] = useState<string[]>([]);
   const [availablePackages, setAvailablePackages] = useState<string[]>([]);
   const [configVersion, setConfigVersion] = useState(0); // Force re-render when config changes
+  const [currentFormat, setCurrentFormat] = useState<AllExportFormat>('png');
 
   useEffect(() => {
     // Initialize managers and load config
@@ -136,22 +139,64 @@ export const Preview: React.FC<PreviewProps> = ({
       className="preview-panel"
       style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}
     >
-      <DraggablePreview
-        latex={latex}
-        renderedHtml={renderedHtml}
-        defaultDragFormat="png"
+      <div
+        className="preview-content"
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          fontSize: '2em',
+          flex: 1,
+          overflow: 'auto',
+          paddingTop: '2em',
+          position: 'relative'
+        }}
       >
-        <div
-          className="preview-content"
+        {/* 格式选择器 - 右上角 */}
+        <div 
           style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            fontSize: '2em',
-            flex: 1,
-            overflow: 'auto',
-            paddingTop: '2em',
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            zIndex: 10
           }}
+        >
+          <div style={{ position: 'relative' }}>
+            <select
+              value={currentFormat}
+              onChange={(e) => setCurrentFormat(e.target.value as AllExportFormat)}
+              style={{
+                backgroundColor: 'rgb(45,45,45)',
+                color: '#707070',
+                fontFamily: 'monospace',
+                fontWeight: 800,
+                border: '1px solid #4B5563',
+                borderRadius: '4px',
+                padding: '8px 12px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                minWidth: '60px',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
+                textAlign: 'center'
+              }}
+            >
+              <option value="tex" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>TEX</option>
+              <option value="html" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>HTML</option>
+              <option value="svg" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>SVG</option>
+              <option value="png" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>PNG</option>
+              <option value="jpg" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>JPG</option>
+              <option value="pdf" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>PDF</option>
+            </select>
+          </div>
+        </div>
+
+        <DraggablePreview
+          latex={latex}
+          renderedHtml={renderedHtml}
+          filename={filePath ? filePath.split('/').pop() || 'untitled.tex' : 'untitled.tex'}
+          currentFormat={currentFormat}
         >
           <div
             style={{
@@ -167,8 +212,8 @@ export const Preview: React.FC<PreviewProps> = ({
             }}
             dangerouslySetInnerHTML={{ __html: renderedHtml }}
           />
-        </div>
-      </DraggablePreview>
+        </DraggablePreview>
+      </div>
       {error && <div className="preview-error">{error}</div>}
       
       {/* Bottom right controls */}

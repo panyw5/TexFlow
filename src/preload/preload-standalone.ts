@@ -19,10 +19,7 @@ const CHANNELS = {
   CLIPBOARD_READ_TEXT: 'clipboard:read-text',
   CONFIG_SAVE: 'config:save',
   CONFIG_LOAD: 'config:load',
-  // Drag & Drop operations
   DRAG_START: 'drag:start',
-  DRAG_EXPORT_PREPARE: 'drag:export-prepare',
-  DRAG_CLEANUP: 'drag:cleanup',
 };
 
 const MENU_CHANNELS = [
@@ -37,9 +34,6 @@ const MENU_CHANNELS = [
 
 // 暴露 API 到渲染进程
 contextBridge.exposeInMainWorld('electronAPI', {
-  // 通用invoke方法
-  invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
-  
   // 文件操作
   openFile: () => ipcRenderer.invoke(CHANNELS.FILE_OPEN),
   saveFile: (content: string, filePath?: string) => 
@@ -50,17 +44,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke(CHANNELS.FILE_SAVE_BINARY, data, defaultName),
   exportFile: (exportData: { filename: string; data: string; format: string; encoding: string }) => 
     ipcRenderer.invoke(CHANNELS.FILE_EXPORT, exportData),
-
-  // 拖拽导出
-  startDrag: (filePath: string) => 
-    ipcRenderer.send(CHANNELS.DRAG_START, filePath),
-  prepareDragExport: (exportData: any) => 
-    ipcRenderer.invoke(CHANNELS.DRAG_EXPORT_PREPARE, exportData),
-  cleanupDragFiles: () => 
-    ipcRenderer.invoke(CHANNELS.DRAG_CLEANUP),
-  onDragRequestExportData: (callback: (request: any) => void) => {
-    ipcRenderer.on('drag:request-export-data', (_, request) => callback(request));
-  },
 
   // 窗口操作
   minimizeWindow: () => ipcRenderer.invoke(CHANNELS.WINDOW_MINIMIZE),
@@ -83,6 +66,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke(CHANNELS.CONFIG_SAVE, config),
   loadConfig: () => 
     ipcRenderer.invoke(CHANNELS.CONFIG_LOAD),
+
+  // 拖放操作
+  startDrag: (dragData: { filename: string; content: string; filetype: string }) => 
+    ipcRenderer.send(CHANNELS.DRAG_START, dragData),
 
   // 菜单事件监听
   onMenuAction: (callback: (action: string) => void) => {
@@ -107,11 +94,6 @@ declare global {
       saveFileAs: (content: string) => Promise<any>;
       saveBinaryFile: (data: string, defaultName: string) => Promise<any>;
       exportFile: (exportData: { filename: string; data: string; format: string; encoding: string }) => Promise<any>;
-            // Drag and drop operations
-      startDrag: (filePath: string) => void;
-      prepareDragExport: (exportData: any) => Promise<any>;
-      cleanupDragFiles: () => Promise<any>;
-      onDragRequestExportData: (callback: (request: any) => void) => void;
       minimizeWindow: () => Promise<void>;
       maximizeWindow: () => Promise<void>;
       closeWindow: () => Promise<void>;
@@ -124,6 +106,7 @@ declare global {
       loadConfig: () => Promise<any>;
       onMenuAction: (callback: (action: string) => void) => void;
       removeMenuListeners: () => void;
+      startDrag: (dragData: { filename: string; content: string; filetype: string }) => void;
     };
   }
 }

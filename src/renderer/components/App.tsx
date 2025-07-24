@@ -269,6 +269,7 @@ const App: React.FC = () => {
           />
           <Preview 
             latex={state.content}
+            filePath={state.filePath}
           />
         </ResizableSplitPane>
       </div>

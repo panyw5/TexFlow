@@ -1,13 +1,16 @@
-import { ipcMain, dialog, clipboard, app, nativeImage } from 'electron';
+import { ipcMain, dialog, clipboard, app, nativeImage, BrowserWindow } from 'electron';
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { application } from './main';
+import { FormatConverter } from './services/format-converter';
 import { 
   IPC_CHANNELS, 
   FileOpenResult, 
   FileSaveResult,
   FileExportData,
-  FileExportResult
+  FileExportResult,
+  DragStartData
 } from '../shared/ipc-channels';
 
 export function setupIpcHandlers(): void {
@@ -334,6 +337,88 @@ export function setupIpcHandlers(): void {
     } catch (error) {
       console.error('Failed to load config:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  });
+
+  // Drag and drop handler
+  ipcMain.on(IPC_CHANNELS.DRAG_START, async (event, dragData: DragStartData) => {
+    try {
+      // 为缺失的字段提供默认值，兼容 DragDropTest 组件的简单格式
+      const encoding = dragData.encoding || 'utf8';
+      const renderType = dragData.renderType || 'source';
+      
+      console.log('Drag start request received:', { 
+        filename: dragData.filename, 
+        filetype: dragData.filetype, 
+        encoding: encoding,
+        renderType: renderType,
+        contentLength: dragData.content.length 
+      });
+      
+      // Create a temporary file for dragging
+      const tempDir = path.join(app.getPath('temp'), 'texflow-drag');
+      await fs.mkdir(tempDir, { recursive: true });
+      
+      const tempFilePath = path.join(tempDir, dragData.filename);
+      
+      // Handle different encodings properly with async operations
+      const writeFilePromise = (async () => {
+        if (encoding === 'base64') {
+          // Decode base64 data and write as binary
+          console.log('Writing base64 data as binary file');
+          const buffer = Buffer.from(dragData.content, 'base64');
+          await fs.writeFile(tempFilePath, buffer);
+        } else {
+          // Write as text file
+          console.log('Writing text data as UTF-8 file');
+          await fs.writeFile(tempFilePath, dragData.content, 'utf8');
+        }
+      })();
+      
+      // 设置超时防止文件写入卡死
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('File write timeout after 3 seconds')), 3000);
+      });
+      
+      await Promise.race([writeFilePromise, timeoutPromise]);
+      
+      console.log(`Temporary file created: ${tempFilePath}`);
+      
+      // 根据文件类型选择专用的拖拽图标
+      let iconPath: string;
+      switch (dragData.filetype) {
+        case 'tex':
+          iconPath = path.join(__dirname, '../../img/drag-tex.png');
+          break;
+        case 'html':
+          iconPath = path.join(__dirname, '../../img/drag-html.png');
+          break;
+        case 'svg':
+          iconPath = path.join(__dirname, '../../img/drag-svg.png');
+          break;
+        case 'png':
+          iconPath = path.join(__dirname, '../../img/drag-png.png');
+          break;
+        case 'jpg':
+          iconPath = path.join(__dirname, '../../img/drag-jpg.png');
+          break;
+        case 'pdf':
+          iconPath = path.join(__dirname, '../../img/drag-pdf.png');
+          break;
+        default:
+          iconPath = path.join(__dirname, '../../img/drag-icon-64.png');
+      }
+      
+      // Start the drag operation - 使用专用格式图标提升用户体验
+      event.sender.startDrag({
+        file: tempFilePath,
+        icon: iconPath
+      });
+      
+      console.log('Drag operation started for file:', tempFilePath);
+    } catch (error) {
+      console.error('Failed to start drag operation:', error);
+      // 即使失败也不阻塞UI
     }
   });
 }

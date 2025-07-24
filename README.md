@@ -1,105 +1,67 @@
-# TexFlow (beta; vibe code product)
+# TexFlow (测试版; vibe code 产品)
 
 <div align="center">
 <img src="img/logo.png" width="100px" alt="TexFlow Logo">
 </div>
 
-> A modern, lightweight LaTeX equation editor with real-time preview and intelligent autocomplete
+这是一款现代、轻量级的 LaTeX 方程式编辑器，具备即时预览、自动完成、快速导出等功能
 
 ![TexFlow Interface](img/image-1.jpg)
 
 ![TexFlow Interface](img/image-2.jpg)
 
-TexFlow is a LaTeX equation editor designed for mathematicians, scientists, and students who need to create beautiful mathematical expressions quickly and efficiently. Built with modern web technologies and powered by Monaco Editor and KaTeX, it delivers a seamless editing experience with instant visual feedback.
 
-## ✨ Key Features
+## 📖 简介
+本应用的开发目的**并非**替代常用的 LaTex 编辑器，而是作为特定场景下的**补充**
+- 数学物理方面聊天讨论，快速输入 LaTeX 并拖拽 png/jpg 公式到聊天窗口
+- 使用思源笔记、word、wolai 等笔记软件录入数学公式时，提供更舒适的 LaTex 输入窗口
+- 视频会议讨论通过分享屏幕快速交流数学表达式
 
-### 🚀 Real-Time Preview
-- **MacOS and Windows** - cross-platform support
-- **Instant rendering** with KaTeX/MathJax dual engine - see your equations come to life as you type
-- **Synchronized editing** - changes appear immediately in the preview panel
-- **Error highlighting** - instant feedback on syntax errors with helpful suggestions
 
-### 🧠 Intelligent Autocomplete
-![Autocomplete Demo](img/autocomplete.png)
-- **Smart LaTeX suggestions** - context-aware command completion
-- **Symbol picker** - quick access to mathematical symbols and operators
-- **Environment completion** - automatic closing of LaTeX environments
-- **Custom macros support** - define and reuse your own commands
+## ✨ 主要特性
 
-### 🎨 Modern Interface
-- **Clean two-panel design** - distraction-free editing environment
-- **Adaptive layouts** - switch between horizontal and vertical split views
-- **Dark/Light themes** - choose your preferred visual style
-- **Syntax highlighting** - color-coded LaTeX commands for better readability
+- **跨平台**
+- **即时预览**：KaTex/MathJax 双引擎渲染
+- **代码高亮**：轻松发现语法错误
+- **自动完成**：常用 LaTex 指令和符号的下拉菜单补全
+- **多光标编辑**：支持多光标编辑，快速修改多个位置的代码
+- **自定义指令**：MathJax 模式下，支持 `\newcommand` 自定义宏指令，支持加载需要的 LaTex 包
+  > 限于 MathJax 能支持的那些包
+- **一键切换布局**：上下布局与左右布局自由切换
+- **一键复制**：将 LaTeX 代码复制到剪贴簿
+- **拖动导出**：鼠标拖拽即可导出选定格式文件
+- **一键导出**：将渲染结果导出为 png 或 jpg
+- **键盘优先**：常用快捷键支持，提升工作效率
+- **一键悬浮**：工作时将 `TexFlow` 保持在其他视窗之上
 
-### ⚡ Productivity Features
-- **Lightning-fast startup** - ready to use in seconds
-- **Pin to top** - keep TexFlow above other windows while working
-- **One-click copy** - instantly copy LaTeX code to clipboard
-- **One-click switch** - switch between KaTeX and MathJax rendering modes
-- **One-click export** - export to png or jpg
-- **Keyboard-first design** - comprehensive shortcuts for power users
 
-## 🔧 Supported LaTeX
+## ⌨️ 键盘快捷键
 
-TexFlow excels at mathematical content with comprehensive support for:
+| 快捷键 | 操作                                       |
+| ------ | ------------------------------------------ |
+| `⌘ C`  | 复制 LaTeX 到剪贴簿                        |
+| `⌘ D`  | 将选取区段加入下一个寻找相符项，多光标编辑 |
+| `⌘ U`  | 从目前的寻找相符项中移除选取区段           |
+| `⌘ M`  | 将选取范围扩大至下一个括号                 |
+| `⌘ Z`  | 撤销                                       |
+| `⌘ Y`  | 恢复                                       |
 
-```latex
-% Inline and display equations
-$\sum_{i=1}^{n} x_i = \frac{n(n+1)}{2}$
 
-% Complex mathematical expressions
-$$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$
+## 🛠 Tech Stack
 
-% Advanced environments
-\begin{align}
-  \nabla \times \mathbf{E} &= -\frac{\partial \mathbf{B}}{\partial t} \\
-  \nabla \times \mathbf{B} &= \mu_0\mathbf{J} + \mu_0\epsilon_0\frac{\partial \mathbf{E}}{\partial t}
-\end{align}
-```
-
-**Supported Features:**
-- Mathematical operators and symbols
-- Fractions, superscripts, and subscripts  
-- Matrix and array environments
-- Equation and align environments
-- Custom commands and macros
-
-## ⌨️ Keyboard Shortcuts
-
-| Shortcut | Action                                 |
-| -------- | -------------------------------------- |
-| `⌘⇧C`    | Copy LaTeX to clipboard                |
-| `⌘⇧D`    | Add section to next find match         |
-| `⌘⇧U`    | Remove section from current find match |
-| `⌘⇧M`    | Expand selection to next bracket       |
-| `⌘Z`     | Undo                                   |
-| `⌘Y`     | Redo                                   |
-
-## 🚀 Getting Started
-
-1. **Download** the latest release for macOS and Windows
-2. **Install** by dragging to Applications folder
-3. **Launch** TexFlow and start typing LaTeX
-4. **Preview** updates automatically as you type
-
-## 🛠 Technical Stack
-
-- **Electron** - Cross-platform desktop framework
-- **Monaco Editor** - Professional code editor with LaTeX language service
-- **KaTeX** - Fast mathematical notation rendering
-- **React** - Modern UI component architecture
-- **TypeScript** - Type-safe development
+- **Electron** - 跨平台
+- **Monaco Editor** - 具备 LaTeX 语言服务的专业代码编辑器
+- **KaTeX/MathJax** - 极速/快速的数学符号渲染
+- **React**
+- **TypeScript**
 
 ## 🔮 Roadmap
 
-- [ ] **Optimization**: more responsive, smaller size
-- [ ] **Export capabilities** - img, svg, pdf or tex output, drag and drop
-- [ ] **More shortcut/command** - better autocomplete, more short-cuts
-- [ ] **Document history** - version control for your equations
-- [ ] **Custom preambles** - personalized LaTeX environments
-- [ ] **Theming** - custom css
+- [ ] **持久化** - 宏、自定义包、最近 LaTex 代码的历史记录
+- [ ] **导出格式** eps 支持
+- [ ] **优化**：提高性能，减少体积
+- [ ] **更多快捷键/指令** - 更好的自动完成、更多快捷键
+- [ ] **主题** - 自定义 css
 
 ## 📄 License
 

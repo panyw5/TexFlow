@@ -5,7 +5,7 @@ import { RendererToggle } from './RendererToggle';
 import { PreambleEditor } from './PreambleEditor';
 import { PackageManager } from './PackageManager';
 import { ExportButton } from '../Export/ExportButton';
-import { DraggablePreview } from './DraggablePreview';
+import { DraggablePreview, AllExportFormat } from './DraggablePreview';
 import { IRenderer } from '../../services/rendering/IRenderer';
 
 interface PreviewProps {
@@ -29,6 +29,7 @@ export const Preview: React.FC<PreviewProps> = ({
   const [enabledPackages, setEnabledPackages] = useState<string[]>([]);
   const [availablePackages, setAvailablePackages] = useState<string[]>([]);
   const [configVersion, setConfigVersion] = useState(0); // Force re-render when config changes
+  const [currentFormat, setCurrentFormat] = useState<AllExportFormat>('tex');
 
   useEffect(() => {
     // Initialize managers and load config
@@ -148,12 +149,46 @@ export const Preview: React.FC<PreviewProps> = ({
           flex: 1,
           overflow: 'auto',
           paddingTop: '2em',
+          position: 'relative'
         }}
       >
+        {/* 格式选择器 - 右上角 */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            zIndex: 10
+          }}
+        >
+          <select
+            value={currentFormat}
+            onChange={(e) => setCurrentFormat(e.target.value as AllExportFormat)}
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '6px 10px',
+              fontSize: '12px',
+              cursor: 'pointer',
+              minWidth: '60px'
+            }}
+          >
+            <option value="tex">TEX</option>
+            <option value="html">HTML</option>
+            <option value="svg">SVG</option>
+            <option value="png">PNG</option>
+            <option value="jpg">JPG</option>
+            <option value="pdf">PDF</option>
+          </select>
+        </div>
+
         <DraggablePreview
           latex={latex}
           renderedHtml={renderedHtml}
           filename={filePath ? filePath.split('/').pop() || 'untitled.tex' : 'untitled.tex'}
+          currentFormat={currentFormat}
         >
           <div
             style={{

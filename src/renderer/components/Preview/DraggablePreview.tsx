@@ -2,23 +2,24 @@ import React, { useState, useRef } from 'react';
 import { dragDropExportService } from '../../services/drag-drop-export-service';
 import { ExportFormat } from '../../services/export/IExportService';
 
+export type AllExportFormat = ExportFormat | 'html' | 'tex';
+
 interface DraggablePreviewProps {
   children: React.ReactNode;
   latex: string;
   renderedHtml: string;
   filename?: string;
+  currentFormat: AllExportFormat;
 }
-
-type AllExportFormat = ExportFormat | 'html' | 'tex';
 
 export const DraggablePreview: React.FC<DraggablePreviewProps> = ({
   children,
   latex,
   renderedHtml,
-  filename = 'untitled.tex'
+  filename = 'untitled.tex',
+  currentFormat
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [currentFormat, setCurrentFormat] = useState<AllExportFormat>('tex');
   const [isExporting, setIsExporting] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -182,41 +183,6 @@ export const DraggablePreview: React.FC<DraggablePreviewProps> = ({
       title={isExporting ? '正在导出...' : `拖拽导出 ${currentFormat.toUpperCase()} 格式`}
     >
       {children}
-      
-      {/* 格式选择器移到右上角 */}
-      <div 
-        style={{
-          position: 'absolute',
-          top: '12px',
-          right: '12px',
-          zIndex: 10
-        }}
-        onClick={(e) => e.stopPropagation()} // 防止触发拖拽
-      >
-        {/* 格式选择下拉菜单 */}
-        <select
-          value={currentFormat}
-          onChange={(e) => setCurrentFormat(e.target.value as AllExportFormat)}
-          disabled={isExporting}
-          style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            padding: '6px 10px',
-            fontSize: '12px',
-            cursor: isExporting ? 'wait' : 'pointer',
-            opacity: isExporting ? 0.6 : 1,
-            minWidth: '60px'
-          }}
-        >
-          {availableFormats.map(format => (
-            <option key={format} value={format}>
-              {format.toUpperCase()}
-            </option>
-          ))}
-        </select>
-      </div>
 
       {/* 导出状态指示器 */}
       {isExporting && (
@@ -290,7 +256,15 @@ export const DraggablePreview: React.FC<DraggablePreviewProps> = ({
           
           .draggable-preview:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transition: box-shadow 0.2s ease;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            background-color: rgba(59, 130, 246, 0.02);
+            transition: all 0.2s ease;
+          }
+          
+          .draggable-preview {
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            border-radius: 4px;
           }
         `}
       </style>

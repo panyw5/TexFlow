@@ -384,13 +384,35 @@ export function setupIpcHandlers(): void {
       
       console.log(`Temporary file created: ${tempFilePath}`);
       
-      // 参考测试项目：使用字符串路径而不是 nativeImage 对象
-      const iconPath = path.join(__dirname, '../../img/logo.png');
+      // 根据文件类型选择专用的拖拽图标
+      let iconPath: string;
+      switch (dragData.filetype) {
+        case 'tex':
+          iconPath = path.join(__dirname, '../../img/drag-tex.png');
+          break;
+        case 'html':
+          iconPath = path.join(__dirname, '../../img/drag-html.png');
+          break;
+        case 'svg':
+          iconPath = path.join(__dirname, '../../img/drag-svg.png');
+          break;
+        case 'png':
+          iconPath = path.join(__dirname, '../../img/drag-png.png');
+          break;
+        case 'jpg':
+          iconPath = path.join(__dirname, '../../img/drag-jpg.png');
+          break;
+        case 'pdf':
+          iconPath = path.join(__dirname, '../../img/drag-pdf.png');
+          break;
+        default:
+          iconPath = path.join(__dirname, '../../img/drag-icon-32.png');
+      }
       
-      // Start the drag operation - 使用与测试项目相同的简单参数格式
+      // Start the drag operation - 使用专用格式图标提升用户体验
       event.sender.startDrag({
         file: tempFilePath,
-        icon: iconPath  // 使用字符串路径，如测试项目
+        icon: iconPath
       });
       
       console.log('Drag operation started for file:', tempFilePath);

@@ -88,36 +88,82 @@ export const DraggablePreview: React.FC<DraggablePreviewProps> = ({
       }}
       draggable={!isExporting}
       onDragStart={(event) => {
-        // 完全复制成功的 DragDropTest 组件的处理方式
+        // 完全复制成功的 DragDropTest 组件的处理方式，但添加其他格式支持
         event.preventDefault();
         setIsDragging(true);
+        setIsExporting(true);
         
         if (window.electronAPI && window.electronAPI.startDrag) {
-          let content: string;
-          let filetype: 'tex' | 'html' | 'png' | 'pdf' = 'tex';
-          let dragFilename: string;
-          
+          // 简单格式立即处理
           if (currentFormat === 'tex') {
-            content = latex;
-            filetype = 'tex';
-            dragFilename = filename.endsWith('.tex') ? filename : filename + '.tex';
-          } else if (currentFormat === 'html') {
-            content = dragDropExportService.createStandaloneHTML(latex, renderedHtml);
-            filetype = 'html';
-            dragFilename = filename.replace(/\.[^.]+$/, '.html');
-          } else {
-            // 对于其他格式，暂时使用 LaTeX 源码
-            content = latex;
-            filetype = 'tex';
-            dragFilename = filename.endsWith('.tex') ? filename : filename + '.tex';
+            const content = latex;
+            const filetype = 'tex';
+            const dragFilename = filename.endsWith('.tex') ? filename : filename + '.tex';
+            
+            window.electronAPI.startDrag({
+              filename: dragFilename,
+              content,
+              filetype,
+              encoding: 'utf8'
+            });
+            setIsExporting(false);
+            return;
           }
-
-          // 使用与 DragDropTest 完全相同的参数格式
-          window.electronAPI.startDrag({
-            filename: dragFilename,
-            content,
-            filetype
-          });
+          
+          if (currentFormat === 'html') {
+            const content = dragDropExportService.createStandaloneHTML(latex, renderedHtml);
+            const filetype = 'html';
+            const dragFilename = filename.replace(/\.[^.]+$/, '.html');
+            
+            window.electronAPI.startDrag({
+              filename: dragFilename,
+              content,
+              filetype,
+              encoding: 'utf8'
+            });
+            setIsExporting(false);
+            return;
+          }
+          
+          // 对于复杂格式，异步处理但不阻塞拖拽
+          (async () => {
+            try {
+              const exportOptions = {
+                scale: 0.8,
+                quality: currentFormat === 'jpg' ? 0.85 : 0.95,
+                backgroundColor: currentFormat === 'png' ? 'transparent' : 'white',
+                padding: 15
+              };
+              
+              console.log(`开始导出 ${currentFormat.toUpperCase()} 格式`);
+              
+              const exportResult = await dragDropExportService.generateExportContent(
+                latex, 
+                currentFormat as ExportFormat,
+                exportOptions
+              );
+              
+              window.electronAPI?.startDrag({
+                filename: exportResult.filename || filename.replace(/\.[^.]+$/, `.${currentFormat}`),
+                content: exportResult.content,
+                filetype: currentFormat as 'svg' | 'png' | 'jpg' | 'pdf',
+                encoding: exportResult.encoding
+              });
+              
+              console.log(`${currentFormat.toUpperCase()} 导出完成`);
+            } catch (error) {
+              console.error(`导出 ${currentFormat} 格式失败:`, error);
+              // 失败时使用 LaTeX 源码作为后备
+              window.electronAPI?.startDrag({
+                filename: filename.endsWith('.tex') ? filename : filename + '.tex',
+                content: latex,
+                filetype: 'tex',
+                encoding: 'utf8'
+              });
+            } finally {
+              setIsExporting(false);
+            }
+          })();
         }
       }}
       onDragEnd={handleDragEnd}

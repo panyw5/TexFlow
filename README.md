@@ -8,12 +8,11 @@
 
 ![TexFlow Interface](img/image-1.jpg)
 
-![TexFlow Interface](img/image-2.jpg)
 
 
 ## 📖 简介
 本应用的开发目的**并非**替代常用的 LaTex 编辑器，而是作为特定场景下的**补充**
-- 数学物理方面聊天讨论，快速输入 LaTeX 并拖拽 png/jpg 公式到聊天窗口
+- 数学物理方面聊天讨论，快速输入 LaTeX 并拖动 `png`/`jpg` 公式到聊天窗口
 - 使用思源笔记、word、wolai 等笔记软件录入数学公式时，提供更舒适的 LaTex 输入窗口
 - 视频会议讨论通过分享屏幕快速交流数学表达式
 
@@ -33,6 +32,19 @@
 - **一键导出**：将渲染结果导出为 png 或 jpg
 - **键盘优先**：常用快捷键支持，提升工作效率
 - **一键悬浮**：工作时将 `TexFlow` 保持在其他视窗之上
+
+
+
+![TexFlow Interface](README-imgs/autocomplete.gif)
+
+![TexFlow Interface](README-imgs/drag-and-drop.gif)
+
+![TexFlow Interface](README-imgs/image-3.jpg)
+
+![TexFlow Interface](README-imgs/image-4.jpg)
+
+![TexFlow Interface](README-imgs/image-5.jpg)
+
 
 
 ## ⌨️ 键盘快捷键

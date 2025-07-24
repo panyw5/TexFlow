@@ -215,13 +215,15 @@ export const DraggablePreview: React.FC<DraggablePreviewProps> = ({
             transform: 'translateX(-50%)',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
-            padding: '4px 8px',
+            padding: '4px 12px',
             borderRadius: '4px',
             fontSize: '11px',
             pointerEvents: 'none',
             opacity: 0,
             transition: 'opacity 0.2s ease',
-            zIndex: 10
+            zIndex: 10,
+            whiteSpace: 'nowrap',
+            minWidth: 'max-content'
           }}
           className="drag-hint"
         >

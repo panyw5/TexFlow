@@ -406,7 +406,7 @@ export function setupIpcHandlers(): void {
           iconPath = path.join(__dirname, '../../img/drag-pdf.png');
           break;
         default:
-          iconPath = path.join(__dirname, '../../img/drag-icon-32.png');
+          iconPath = path.join(__dirname, '../../img/drag-icon-64.png');
       }
       
       // Start the drag operation - 使用专用格式图标提升用户体验

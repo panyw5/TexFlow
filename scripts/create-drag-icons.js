@@ -13,7 +13,7 @@ const iconConfigs = [
 ];
 
 const createIcon = (config) => {
-  const size = 32;
+  const size = 64;
   const canvas = createCanvas(size, size);
   const ctx = canvas.getContext('2d');
   
@@ -23,12 +23,12 @@ const createIcon = (config) => {
   
   // 边框
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(1, 1, size - 2, size - 2);
+  ctx.lineWidth = 3;
+  ctx.strokeRect(2, 2, size - 4, size - 4);
   
   // 文字
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 8px Arial';
+  ctx.font = 'bold 14px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(config.type, size / 2, size / 2);

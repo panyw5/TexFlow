@@ -29,7 +29,7 @@ export const Preview: React.FC<PreviewProps> = ({
   const [enabledPackages, setEnabledPackages] = useState<string[]>([]);
   const [availablePackages, setAvailablePackages] = useState<string[]>([]);
   const [configVersion, setConfigVersion] = useState(0); // Force re-render when config changes
-  const [currentFormat, setCurrentFormat] = useState<AllExportFormat>('tex');
+  const [currentFormat, setCurrentFormat] = useState<AllExportFormat>('png');
 
   useEffect(() => {
     // Initialize managers and load config
@@ -167,7 +167,9 @@ export const Preview: React.FC<PreviewProps> = ({
               onChange={(e) => setCurrentFormat(e.target.value as AllExportFormat)}
               style={{
                 backgroundColor: 'rgb(45,45,45)',
-                color: 'white',
+                color: '#707070',
+                fontFamily: 'monospace',
+                fontWeight: 800,
                 border: '1px solid #4B5563',
                 borderRadius: '4px',
                 padding: '8px 12px',
@@ -180,12 +182,12 @@ export const Preview: React.FC<PreviewProps> = ({
                 textAlign: 'center'
               }}
             >
-              <option value="tex">TEX</option>
-              <option value="html">HTML</option>
-              <option value="svg">SVG</option>
-              <option value="png">PNG</option>
-              <option value="jpg">JPG</option>
-              <option value="pdf">PDF</option>
+              <option value="tex" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>TEX</option>
+              <option value="html" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>HTML</option>
+              <option value="svg" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>SVG</option>
+              <option value="png" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>PNG</option>
+              <option value="jpg" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>JPG</option>
+              <option value="pdf" style={{ color: '#707070', fontFamily: 'monospace', fontWeight: 800 }}>PDF</option>
             </select>
           </div>
         </div>

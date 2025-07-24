@@ -343,10 +343,15 @@ export function setupIpcHandlers(): void {
   // Drag and drop handler
   ipcMain.on(IPC_CHANNELS.DRAG_START, async (event, dragData: DragStartData) => {
     try {
+      // 为缺失的字段提供默认值，兼容 DragDropTest 组件的简单格式
+      const encoding = dragData.encoding || 'utf8';
+      const renderType = dragData.renderType || 'source';
+      
       console.log('Drag start request received:', { 
         filename: dragData.filename, 
         filetype: dragData.filetype, 
-        encoding: dragData.encoding,
+        encoding: encoding,
+        renderType: renderType,
         contentLength: dragData.content.length 
       });
       
@@ -356,32 +361,42 @@ export function setupIpcHandlers(): void {
       
       const tempFilePath = path.join(tempDir, dragData.filename);
       
-      // Handle different encodings properly
-      if (dragData.encoding === 'base64') {
-        // Decode base64 data and write as binary
-        console.log('Writing base64 data as binary file');
-        const buffer = Buffer.from(dragData.content, 'base64');
-        await fs.writeFile(tempFilePath, buffer);
-      } else {
-        // Write as text file
-        console.log('Writing text data as UTF-8 file');
-        await fs.writeFile(tempFilePath, dragData.content, 'utf8');
-      }
+      // Handle different encodings properly with async operations
+      const writeFilePromise = (async () => {
+        if (encoding === 'base64') {
+          // Decode base64 data and write as binary
+          console.log('Writing base64 data as binary file');
+          const buffer = Buffer.from(dragData.content, 'base64');
+          await fs.writeFile(tempFilePath, buffer);
+        } else {
+          // Write as text file
+          console.log('Writing text data as UTF-8 file');
+          await fs.writeFile(tempFilePath, dragData.content, 'utf8');
+        }
+      })();
+      
+      // 设置超时防止文件写入卡死
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('File write timeout after 3 seconds')), 3000);
+      });
+      
+      await Promise.race([writeFilePromise, timeoutPromise]);
       
       console.log(`Temporary file created: ${tempFilePath}`);
       
-      // Create a simple icon for the drag operation (optional)
+      // 参考测试项目：使用字符串路径而不是 nativeImage 对象
       const iconPath = path.join(__dirname, '../../img/logo.png');
       
-      // Start the drag operation
+      // Start the drag operation - 使用与测试项目相同的简单参数格式
       event.sender.startDrag({
         file: tempFilePath,
-        icon: iconPath
+        icon: iconPath  // 使用字符串路径，如测试项目
       });
       
       console.log('Drag operation started for file:', tempFilePath);
     } catch (error) {
       console.error('Failed to start drag operation:', error);
+      // 即使失败也不阻塞UI
     }
   });
 }

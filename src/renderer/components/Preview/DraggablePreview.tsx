@@ -65,103 +65,12 @@ export const DraggablePreview: React.FC<DraggablePreviewProps> = ({
     return configs[format];
   };
 
-  const handleDragStart = async (event: React.DragEvent) => {
-    // 设置拖拽图像为当前公式内容
-    if (containerRef.current) {
-      const dragImage = containerRef.current.cloneNode(true) as HTMLElement;
-      dragImage.style.position = 'absolute';
-      dragImage.style.top = '-9999px';
-      dragImage.style.left = '-9999px';
-      dragImage.style.transform = 'scale(0.8)';
-      dragImage.style.opacity = '0.8';
-      dragImage.style.backgroundColor = 'white';
-      dragImage.style.border = '2px solid #ddd';
-      dragImage.style.borderRadius = '4px';
-      dragImage.style.padding = '8px';
-      document.body.appendChild(dragImage);
-      
-      event.dataTransfer.setDragImage(dragImage, 50, 25);
-      
-      // 清理临时元素
-      setTimeout(() => {
-        document.body.removeChild(dragImage);
-      }, 100);
-    }
-    
-    event.preventDefault();
-    setIsDragging(true);
-    setIsExporting(true);
-
-    if (window.electronAPI && window.electronAPI.startDrag) {
-      try {
-        let content: string;
-        let filetype: 'tex' | 'html' | 'svg' | 'png' | 'jpg' | 'pdf';
-        let dragFilename: string;
-        let encoding: 'utf8' | 'base64' = 'utf8';
-
-        switch (currentFormat) {
-          case 'tex':
-            content = latex;
-            filetype = 'tex';
-            dragFilename = filename.endsWith('.tex') ? filename : filename + '.tex';
-            break;
-
-          case 'html':
-            content = dragDropExportService.createStandaloneHTML(latex, renderedHtml);
-            filetype = 'html';
-            dragFilename = filename.replace(/\.[^.]+$/, '.html');
-            break;
-
-          case 'svg':
-          case 'png':
-          case 'jpg':
-          case 'pdf':
-            // 使用现有导出服务，4x 缩放以提高清晰度
-            const exportOptions = {
-              scale: 1, // 4x 缩放以提高图片质量
-              quality: currentFormat === 'jpg' ? 0.95 : 0.98,
-              backgroundColor: currentFormat === 'png' ? 'transparent' : 'white',
-              padding: 20
-            };
-            
-            console.log(`=== 拖放导出 ${currentFormat.toUpperCase()} 开始 ===`);
-            console.log('导出选项:', exportOptions);
-            
-            const exportResult = await dragDropExportService.generateExportContent(
-              latex, 
-              currentFormat as ExportFormat,
-              exportOptions
-            );
-            
-            content = exportResult.content;
-            encoding = exportResult.encoding;
-            filetype = currentFormat as 'svg' | 'png' | 'jpg' | 'pdf';
-            dragFilename = exportResult.filename || filename.replace(/\.[^.]+$/, `.${currentFormat}`);
-            break;
-
-          default:
-            return;
-        }
-
-        window.electronAPI.startDrag({
-          filename: dragFilename,
-          content,
-          filetype,
-          renderType: currentFormat === 'tex' ? 'source' : 'rendered',
-          encoding
-        });
-      } catch (error) {
-        console.error('Failed to start drag operation:', error);
-        alert(`导出失败: ${error instanceof Error ? error.message : '未知错误'}`);
-      } finally {
-        setIsExporting(false);
-      }
-    }
-  };
-
   const handleDragEnd = () => {
     setIsDragging(false);
-    setIsExporting(false);
+    // 确保状态被重置，即使异步操作还在进行
+    setTimeout(() => {
+      setIsExporting(false);
+    }, 50);
   };
 
   const availableFormats: AllExportFormat[] = ['tex', 'html', 'svg', 'png', 'jpg', 'pdf'];
@@ -174,11 +83,43 @@ export const DraggablePreview: React.FC<DraggablePreviewProps> = ({
       className="draggable-preview"
       style={{ 
         position: 'relative', 
-        height: '100%', 
+        padding: '0px 50px',
         cursor: isDragging ? 'grabbing' : 'grab' 
       }}
       draggable={!isExporting}
-      onDragStart={handleDragStart}
+      onDragStart={(event) => {
+        // 完全复制成功的 DragDropTest 组件的处理方式
+        event.preventDefault();
+        setIsDragging(true);
+        
+        if (window.electronAPI && window.electronAPI.startDrag) {
+          let content: string;
+          let filetype: 'tex' | 'html' | 'png' | 'pdf' = 'tex';
+          let dragFilename: string;
+          
+          if (currentFormat === 'tex') {
+            content = latex;
+            filetype = 'tex';
+            dragFilename = filename.endsWith('.tex') ? filename : filename + '.tex';
+          } else if (currentFormat === 'html') {
+            content = dragDropExportService.createStandaloneHTML(latex, renderedHtml);
+            filetype = 'html';
+            dragFilename = filename.replace(/\.[^.]+$/, '.html');
+          } else {
+            // 对于其他格式，暂时使用 LaTeX 源码
+            content = latex;
+            filetype = 'tex';
+            dragFilename = filename.endsWith('.tex') ? filename : filename + '.tex';
+          }
+
+          // 使用与 DragDropTest 完全相同的参数格式
+          window.electronAPI.startDrag({
+            filename: dragFilename,
+            content,
+            filetype
+          });
+        }
+      }}
       onDragEnd={handleDragEnd}
       title={isExporting ? '正在导出...' : `拖拽导出 ${currentFormat.toUpperCase()} 格式`}
     >
@@ -256,8 +197,8 @@ export const DraggablePreview: React.FC<DraggablePreviewProps> = ({
           
           .draggable-preview:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border: 2px solid rgba(59, 130, 246, 0.3);
-            background-color: rgba(59, 130, 246, 0.02);
+            border: 2px solid #4B5563;
+            background-color: #374151;
             transition: all 0.2s ease;
           }
           

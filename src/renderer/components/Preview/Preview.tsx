@@ -161,27 +161,33 @@ export const Preview: React.FC<PreviewProps> = ({
             zIndex: 10
           }}
         >
-          <select
-            value={currentFormat}
-            onChange={(e) => setCurrentFormat(e.target.value as AllExportFormat)}
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '6px 10px',
-              fontSize: '12px',
-              cursor: 'pointer',
-              minWidth: '60px'
-            }}
-          >
-            <option value="tex">TEX</option>
-            <option value="html">HTML</option>
-            <option value="svg">SVG</option>
-            <option value="png">PNG</option>
-            <option value="jpg">JPG</option>
-            <option value="pdf">PDF</option>
-          </select>
+          <div style={{ position: 'relative' }}>
+            <select
+              value={currentFormat}
+              onChange={(e) => setCurrentFormat(e.target.value as AllExportFormat)}
+              style={{
+                backgroundColor: 'rgb(45,45,45)',
+                color: 'white',
+                border: '1px solid #4B5563',
+                borderRadius: '4px',
+                padding: '8px 12px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                minWidth: '60px',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
+                textAlign: 'center'
+              }}
+            >
+              <option value="tex">TEX</option>
+              <option value="html">HTML</option>
+              <option value="svg">SVG</option>
+              <option value="png">PNG</option>
+              <option value="jpg">JPG</option>
+              <option value="pdf">PDF</option>
+            </select>
+          </div>
         </div>
 
         <DraggablePreview

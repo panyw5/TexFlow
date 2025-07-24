@@ -19,6 +19,7 @@ const CHANNELS = {
   CLIPBOARD_READ_TEXT: 'clipboard:read-text',
   CONFIG_SAVE: 'config:save',
   CONFIG_LOAD: 'config:load',
+  DRAG_START: 'drag:start',
 };
 
 const MENU_CHANNELS = [
@@ -66,6 +67,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loadConfig: () => 
     ipcRenderer.invoke(CHANNELS.CONFIG_LOAD),
 
+  // 拖放操作
+  startDrag: (dragData: { filename: string; content: string; filetype: string }) => 
+    ipcRenderer.send(CHANNELS.DRAG_START, dragData),
+
   // 菜单事件监听
   onMenuAction: (callback: (action: string) => void) => {
     MENU_CHANNELS.forEach(channel => {
@@ -101,6 +106,7 @@ declare global {
       loadConfig: () => Promise<any>;
       onMenuAction: (callback: (action: string) => void) => void;
       removeMenuListeners: () => void;
+      startDrag: (dragData: { filename: string; content: string; filetype: string }) => void;
     };
   }
 }

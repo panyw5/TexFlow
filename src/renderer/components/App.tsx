@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { LaTeXEditor } from './Editor/LaTeXEditor';
 import { Preview } from './Preview/Preview';
 import { ResizableSplitPane } from './Layout/ResizableSplitPane';
+import { DragDropTest } from './DragDrop/DragDropTest';
 import { ThemeManager } from '../utils/theme-manager';
 
 interface AppState {
@@ -11,6 +12,7 @@ interface AppState {
   theme: 'light' | 'dark';
   previewVisible: boolean;
   splitDirection: 'horizontal' | 'vertical';
+  showDragDropTest: boolean;
 }
 
 const App: React.FC = () => {
@@ -23,6 +25,7 @@ const App: React.FC = () => {
     theme: themeManager.getCurrentTheme(),
     previewVisible: true,
     splitDirection: themeManager.getSplitDirection(), // 使用保存的布局
+    showDragDropTest: false,
   });
 
   // 监听布局变化
@@ -96,6 +99,13 @@ const App: React.FC = () => {
       content: '',
       filePath: null,
       isDirty: false,
+    }));
+  }, []);
+
+  const handleToggleDragDropTest = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      showDragDropTest: !prev.showDragDropTest,
     }));
   }, []);
 
@@ -212,6 +222,39 @@ const App: React.FC = () => {
               </svg>
             </button>
 
+            {/* Drag Drop Test */}
+            <button
+              onClick={handleToggleDragDropTest}
+              style={{
+                backgroundColor: state.showDragDropTest ? '#3b82f6' : '#3a3a3a',
+                color: 'white',
+                padding: '8px',
+                borderRadius: '6px',
+                border: '1px solid rgba(85, 85, 85, 0.5)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                transition: 'all 0.2s ease',
+                WebkitAppRegion: 'no-drag'
+              } as React.CSSProperties}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = state.showDragDropTest ? '#2563eb' : '#4a4a4a';
+                e.currentTarget.style.borderColor = 'rgba(102, 102, 102, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = state.showDragDropTest ? '#3b82f6' : '#3a3a3a';
+                e.currentTarget.style.borderColor = 'rgba(85, 85, 85, 0.5)';
+              }}
+              title="Toggle drag and drop test"
+            >
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13 7h9v2h-9v-2zm0 8h9v2h-9v-2zm3-4h6v2h-6v-2zm-3 1L9 8v3H1v2h8v3l4-4z"/>
+              </svg>
+            </button>
+
             {/* Pin Window */}
             <button
               onClick={handleTogglePin}
@@ -253,24 +296,63 @@ const App: React.FC = () => {
       </div>
 
       <div style={{ flex: 1, overflow: 'hidden' }}>
-        <ResizableSplitPane
-          direction={state.splitDirection}
-          defaultSize={50}
-          minSize={20}
-          maxSize={80}
-        >
-          <LaTeXEditor
-            ref={editorRef}
-            value={state.content}
-            onChange={handleContentChange}
-            theme={state.theme}
-            onCopyToClipboard={handleCopyToClipboard}
-            isCopied={isCopied}
-          />
-          <Preview 
-            latex={state.content}
-          />
-        </ResizableSplitPane>
+        {state.showDragDropTest ? (
+          <div style={{ display: 'flex', height: '100%' }}>
+            <div style={{ flex: 1 }}>
+              <ResizableSplitPane
+                direction={state.splitDirection}
+                defaultSize={50}
+                minSize={20}
+                maxSize={80}
+              >
+                <LaTeXEditor
+                  ref={editorRef}
+                  value={state.content}
+                  onChange={handleContentChange}
+                  theme={state.theme}
+                  onCopyToClipboard={handleCopyToClipboard}
+                  isCopied={isCopied}
+                />
+                <Preview 
+                  latex={state.content}
+                  filePath={state.filePath}
+                />
+              </ResizableSplitPane>
+            </div>
+            <div style={{ 
+              width: '300px', 
+              borderLeft: '1px solid #ddd',
+              backgroundColor: state.theme === 'dark' ? '#1a1a1a' : '#ffffff',
+              padding: '16px',
+              overflowY: 'auto'
+            }}>
+              <DragDropTest 
+                content={state.content}
+                filename={state.filePath ? state.filePath.split('/').pop() || 'untitled.tex' : 'untitled.tex'}
+              />
+            </div>
+          </div>
+        ) : (
+          <ResizableSplitPane
+            direction={state.splitDirection}
+            defaultSize={50}
+            minSize={20}
+            maxSize={80}
+          >
+            <LaTeXEditor
+              ref={editorRef}
+              value={state.content}
+              onChange={handleContentChange}
+              theme={state.theme}
+              onCopyToClipboard={handleCopyToClipboard}
+              isCopied={isCopied}
+            />
+            <Preview 
+              latex={state.content}
+              filePath={state.filePath}
+            />
+          </ResizableSplitPane>
+        )}
       </div>
     </div>
   );

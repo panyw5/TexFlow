@@ -29,6 +29,9 @@ declare global {
       // Menu operations
       onMenuAction: (callback: (action: string) => void) => void;
       removeMenuListeners: () => void;
+      
+      // Drag and drop operations
+      startDrag: (dragData: { filename: string; content: string; filetype: string; renderType?: string; encoding?: string }) => void;
     };
   }
 }

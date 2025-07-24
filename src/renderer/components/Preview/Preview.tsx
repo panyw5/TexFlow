@@ -5,16 +5,19 @@ import { RendererToggle } from './RendererToggle';
 import { PreambleEditor } from './PreambleEditor';
 import { PackageManager } from './PackageManager';
 import { ExportButton } from '../Export/ExportButton';
+import { DraggablePreview } from './DraggablePreview';
 import { IRenderer } from '../../services/rendering/IRenderer';
 
 interface PreviewProps {
   latex: string;
+  filePath?: string | null;
 }
 
 const configManager = new UserConfigManager();
 
 export const Preview: React.FC<PreviewProps> = ({ 
-  latex
+  latex,
+  filePath = null
 }) => {
   const [rendererManager, setRendererManager] = useState<RendererManager | null>(null);
   const [currentRenderer, setCurrentRenderer] = useState<'katex' | 'mathjax'>('katex');
@@ -147,20 +150,26 @@ export const Preview: React.FC<PreviewProps> = ({
           paddingTop: '2em',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '200px',
-            width: '100%',
-            // 统一样式来确保 KaTeX 和 MathJax 输出一致
-            fontSize: 'inherit',
-            lineHeight: '1.2',
-            textAlign: 'center'
-          }}
-          dangerouslySetInnerHTML={{ __html: renderedHtml }}
-        />
+        <DraggablePreview
+          latex={latex}
+          renderedHtml={renderedHtml}
+          filename={filePath ? filePath.split('/').pop() || 'untitled.tex' : 'untitled.tex'}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: '200px',
+              width: '100%',
+              // 统一样式来确保 KaTeX 和 MathJax 输出一致
+              fontSize: 'inherit',
+              lineHeight: '1.2',
+              textAlign: 'center'
+            }}
+            dangerouslySetInnerHTML={{ __html: renderedHtml }}
+          />
+        </DraggablePreview>
       </div>
       {error && <div className="preview-error">{error}</div>}
       

@@ -35,6 +35,9 @@ export const IPC_CHANNELS = {
   // Config operations
   CONFIG_SAVE: 'config:save',
   CONFIG_LOAD: 'config:load',
+  
+  // Drag and drop operations
+  DRAG_START: 'drag:start',
 } as const;
 
 // Type definitions for IPC messages
@@ -82,5 +85,13 @@ export interface FileExportData {
   filename: string;
   data: string; // Can be base64 for binary or plain text for text files
   format: 'svg' | 'png' | 'jpg' | 'pdf';
-  encoding: 'utf8' | 'base64';
+  encoding: 'base64' | 'utf8';
+}
+
+export interface DragStartData {
+  filename: string;
+  content: string;
+  filetype: 'tex' | 'pdf' | 'png' | 'jpg' | 'html' | 'svg';
+  renderType?: 'source' | 'rendered';
+  encoding?: 'base64' | 'utf8'; // 区分文本和二进制数据
 }

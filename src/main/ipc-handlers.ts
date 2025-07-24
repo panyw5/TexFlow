@@ -1,13 +1,16 @@
-import { ipcMain, dialog, clipboard, app } from 'electron';
+import { ipcMain, dialog, clipboard, app, nativeImage, BrowserWindow } from 'electron';
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { application } from './main';
+import { FormatConverter } from './services/format-converter';
 import { 
   IPC_CHANNELS, 
   FileOpenResult, 
   FileSaveResult,
   FileExportData,
-  FileExportResult
+  FileExportResult,
+  DragStartData
 } from '../shared/ipc-channels';
 
 export function setupIpcHandlers(): void {
@@ -334,6 +337,51 @@ export function setupIpcHandlers(): void {
     } catch (error) {
       console.error('Failed to load config:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  });
+
+  // Drag and drop handler
+  ipcMain.on(IPC_CHANNELS.DRAG_START, async (event, dragData: DragStartData) => {
+    try {
+      console.log('Drag start request received:', { 
+        filename: dragData.filename, 
+        filetype: dragData.filetype, 
+        encoding: dragData.encoding,
+        contentLength: dragData.content.length 
+      });
+      
+      // Create a temporary file for dragging
+      const tempDir = path.join(app.getPath('temp'), 'texflow-drag');
+      await fs.mkdir(tempDir, { recursive: true });
+      
+      const tempFilePath = path.join(tempDir, dragData.filename);
+      
+      // Handle different encodings properly
+      if (dragData.encoding === 'base64') {
+        // Decode base64 data and write as binary
+        console.log('Writing base64 data as binary file');
+        const buffer = Buffer.from(dragData.content, 'base64');
+        await fs.writeFile(tempFilePath, buffer);
+      } else {
+        // Write as text file
+        console.log('Writing text data as UTF-8 file');
+        await fs.writeFile(tempFilePath, dragData.content, 'utf8');
+      }
+      
+      console.log(`Temporary file created: ${tempFilePath}`);
+      
+      // Create a simple icon for the drag operation (optional)
+      const iconPath = path.join(__dirname, '../../img/logo.png');
+      
+      // Start the drag operation
+      event.sender.startDrag({
+        file: tempFilePath,
+        icon: iconPath
+      });
+      
+      console.log('Drag operation started for file:', tempFilePath);
+    } catch (error) {
+      console.error('Failed to start drag operation:', error);
     }
   });
 }
